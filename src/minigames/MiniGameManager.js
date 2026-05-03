@@ -106,6 +106,35 @@ class MiniGameManager {
     this.gameLoop();
   }
 
+  startPracticeMiniGame(gameType, callback) {
+    audioManager.init();
+    audioManager.stopMusic();
+
+    const difficulty = 2;
+    this.isDuel = false;
+    this.isAIAttacking = false;
+    this.attackerPiece = { type: 'pawn', color: 'white' };
+    this.defenderPiece = { type: 'pawn', color: 'black' };
+    this.botTimer = 0;
+
+    this.currentGame = new gameType();
+    this.currentGame.init(this.attackerPiece, this.defenderPiece, difficulty, false);
+    this.active = true;
+    this.callback = callback;
+    this.startTime = Date.now();
+    this.doneTime = 0;
+
+    const overlay = document.getElementById('miniGameOverlay');
+    overlay.classList.add('active');
+    this.overlayCtx = overlay.getContext('2d');
+    store.set('miniGameActive', true);
+
+    audioManager.playMiniGameStart();
+
+    if (this.animFrame) cancelAnimationFrame(this.animFrame);
+    this.gameLoop();
+  }
+
   gameLoop() {
     if (!this.active) return;
 

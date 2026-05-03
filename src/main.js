@@ -49,6 +49,7 @@ function initApp() {
   registerScreen('characterSelect', CharacterSelect);
   registerScreen('game', GameScreen);
   registerScreen('settings', SettingsScreen);
+  registerScreen('miniGamePractice', MiniGamePractice);
 
   function getMousePos(e, el) {
     const rect = el.getBoundingClientRect();

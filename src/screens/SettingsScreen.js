@@ -21,6 +21,13 @@ const SettingsScreen = {
         },
       },
       {
+        label: 'Practice Mini-Games',
+        value: () => '→',
+        action: () => {
+          switchScreen('miniGamePractice');
+        },
+      },
+      {
         label: 'Audio',
         value: () => this.settings.audioEnabled ? 'ON' : 'OFF',
         toggle: () => {
