@@ -11,6 +11,7 @@ class ThemeManager {
     const theme = this.getTheme(id);
     store.set('theme', id);
     PieceRenderer.clearCache();
+    TextureManager.preloadTheme(theme.id);
     store.saveProgress();
     return theme;
   }

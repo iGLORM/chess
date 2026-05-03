@@ -60,8 +60,13 @@ class BoardRenderer {
     ctx.translate(this.shakeOffset.x, this.shakeOffset.y);
 
     // Background
-    ctx.fillStyle = cols.background;
-    ctx.fillRect(0, 0, 1280, 800);
+    const bgTex = TextureManager.getBackgroundTexture(theme.id);
+    if (bgTex) {
+      ctx.drawImage(bgTex, 0, 0, 1280, 800);
+    } else {
+      ctx.fillStyle = cols.background;
+      ctx.fillRect(0, 0, 1280, 800);
+    }
 
     // Side decorations (Mario platformer style)
     this.renderDecorations(ctx, theme);
@@ -97,14 +102,19 @@ class BoardRenderer {
         const sx = boardX + col * squareSize;
         const sy = boardY + row * squareSize;
         const isLight = (row + col) % 2 === 0;
-        ctx.fillStyle = isLight ? cols.lightSquare : cols.darkSquare;
-        ctx.fillRect(sx, sy, squareSize, squareSize);
+        const sqTex = TextureManager.getBoardTexture(theme.id, isLight);
+        if (sqTex) {
+          ctx.drawImage(sqTex, sx, sy, squareSize, squareSize);
+        } else {
+          ctx.fillStyle = isLight ? cols.lightSquare : cols.darkSquare;
+          ctx.fillRect(sx, sy, squareSize, squareSize);
 
-        // Pixel dot texture on dark squares
-        if (!isLight) {
-          ctx.fillStyle = 'rgba(255,255,255,0.04)';
-          if ((row * 8 + col) % 5 === 0) {
-            ctx.fillRect(sx + Math.floor(squareSize/2), sy + Math.floor(squareSize/2), 1, 1);
+          // Pixel dot texture on dark squares
+          if (!isLight) {
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            if ((row * 8 + col) % 5 === 0) {
+              ctx.fillRect(sx + Math.floor(squareSize/2), sy + Math.floor(squareSize/2), 1, 1);
+            }
           }
         }
       }

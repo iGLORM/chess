@@ -16,6 +16,13 @@ class PieceRenderer {
   }
 
   static drawPiece(ctx, type, color, theme, x, y, size) {
+    const tex = TextureManager.getPieceTexture(theme.id, color, type);
+    if (tex) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tex, Math.floor(x), Math.floor(y), Math.floor(size), Math.floor(size));
+      ctx.imageSmoothingEnabled = true;
+      return;
+    }
     const sprite = this.getSprite(type, color, theme);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(sprite, Math.floor(x), Math.floor(y), Math.floor(size), Math.floor(size));

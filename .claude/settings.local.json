@@ -47,7 +47,9 @@
       "Bash(echo \"Launched with PID: $!\")",
       "Bash(echo \"Launched PID: $!\")",
       "Bash(git init *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
