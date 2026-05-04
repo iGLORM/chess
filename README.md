@@ -1,10 +1,30 @@
-# Chess 2.0 - A Pixel Chess Adventure
+<p align="center">
+  <img src="assets/logo.png" alt="Chess 2.0 Banner" width="800" />
+</p>
 
-A fully-featured pixel-art chess game built with Electron and vanilla JavaScript. Play classic chess, challenge unique characters in Story Mode, or battle a friend in local 1v1. Featuring dynamic themes, character dialogue, capture minigames, and a custom chess engine with AI opponents.
+<p align="center">
+  <strong>A fully-featured pixel-art chess game built with Electron and vanilla JavaScript.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Electron-28-47848F?logo=electron&logoColor=white" alt="Electron" />
+  <img src="https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/Canvas-2D-E34F26?logo=html5&logoColor=white" alt="HTML5 Canvas" />
+  <img src="https://img.shields.io/badge/License-Open%20Source-88d8b0" alt="License" />
+  <img src="https://img.shields.io/badge/AI%20Engine-Alpha--Beta%20Pruning-fff5a0?logoColor=black" alt="AI Engine" />
+</p>
+
+<p align="center">
+  Play classic chess, challenge unique characters in Story Mode, or battle a friend in local 1v1.<br/>
+  Featuring dynamic themes, character dialogue, capture minigames, and a custom chess engine with AI opponents.
+</p>
 
 ---
 
 ## Screenshots
+
+<p align="center">
 
 | Home Screen | Mode Select | Game Screen |
 |:---:|:---:|:---:|
@@ -14,27 +34,31 @@ A fully-featured pixel-art chess game built with Electron and vanilla JavaScript
 |:---:|:---:|:---:|
 | ![Character Select](assets/screenshots/character_select.png) | ![Theme Select](assets/screenshots/theme_select.png) | ![Pause Menu](assets/screenshots/pause_menu.png) |
 
+</p>
+
 ---
 
 ## Features
 
 | Feature | Description |
-|---------|-------------|
+|:--------|:------------|
 | **Story Mode** | Battle 5 unique characters with personality-driven dialogue and escalating difficulty |
 | **Local 1v1** | Two players on the same machine with full chess rules |
-| **Classic Chess** | Play against the built-in AI engine with adjustable depth |
-| **Dynamic Themes** | 3 fully-themed visual styles (Space, Medieval, Ocean) with unique color palettes |
+| **Classic Chess** | Play against the built-in AI engine with adjustable depth (10 difficulty levels) |
+| **Dynamic Themes** | 3+ visual styles (Space, Medieval, Ocean) with unique color palettes and unlockable themes |
 | **Character System** | Each opponent has unique dialogue, colors, and AI personality |
 | **Capture Minigames** | 13 skill-based minigames trigger on piece captures for bonus rewards |
 | **Particle Effects** | Animated stars, explosions, and visual feedback |
-| **Save System** | Persistent settings, unlocked themes, and progress tracking |
+| **Save System** | Persistent settings, unlocked themes, and progress tracking via localStorage |
 | **Custom Engine** | Full legal move generation, check/checkmate detection, and AI search with alpha-beta pruning |
+| **Fullscreen** | Toggle fullscreen mode with F11 |
 
 ---
 
 ## Game Modes
 
 ### Story Mode
+
 Face off against 5 themed opponents in order of difficulty:
 
 | Level | Character | Title | Personality |
@@ -48,10 +72,12 @@ Face off against 5 themed opponents in order of difficulty:
 Each character greets you before battle and reacts to victory or defeat.
 
 ### Local 1v1
+
 Two players take turns on the same keyboard. Standard chess rules apply.
 
 ### Classic Chess
-Play against the AI with full control over search depth and difficulty. The AI uses alpha-beta pruning with piece-square tables and material evaluation.
+
+Play against the AI with full control over search depth and difficulty. The AI uses alpha-beta pruning with piece-square tables and material evaluation across 10 difficulty levels.
 
 ---
 
@@ -61,11 +87,11 @@ Switch between visual themes that change the entire board, pieces, UI, and backg
 
 | Theme | Name | Description |
 |:-----:|:-----|:------------|
-| `space` | Star World | Rainbow road in the cosmos |
-| `medieval` | Castle World | Brick blocks and flags |
-| `ocean` | Water World | Bubbles and coral pipes |
+| `space` | Cosmic Abyss | Rainbow road in the cosmos |
+| `medieval` | King's Fortress | Brick blocks and flags |
+| `ocean` | Deep Blue | Bubbles and coral pipes |
 
-Themes affect: board colors, piece colors, highlights, backgrounds, buttons, panels, text, and particle effects.
+Themes affect board colors, piece colors, highlights, backgrounds, buttons, panels, text, and particle effects. Additional themes can be unlocked through gameplay.
 
 ---
 
@@ -74,7 +100,7 @@ Themes affect: board colors, piece colors, highlights, backgrounds, buttons, pan
 When a piece is captured, a skill minigame may trigger (30% chance, toggleable in Settings). Win the minigame for bonus rewards:
 
 | Minigame | Skill Tested |
-|----------|-------------|
+|:---------|:-------------|
 | Quick Click | Speed clicking |
 | Memory Match | Pattern memory |
 | Timing Strike | Precise timing |
@@ -103,103 +129,61 @@ Difficulty scales based on the value of the captured piece.
 | `F` | Flip board (in-game) |
 | `H` | Toggle move hints (in-game) |
 | `P` | Toggle particles (in-game) |
+| `F11` | Toggle fullscreen |
 
 ---
 
-## Tech Stack
-
-| Technology | Purpose |
-|:-----------|:--------|
-| **Electron** | Desktop application wrapper |
-| **HTML5 Canvas** | 2D rendering engine |
-| **Vanilla JavaScript** | Game logic (no frameworks) |
-| **Node.js** | Runtime & package management |
-
----
-
-## Architecture
-
-The codebase is organized into modular components:
-
-```
-src/
-  audio/          # Sound and music management
-  characters/     # Character definitions and manager
-  engine/         # Chess engine (board, moves, rules, AI)
-  input/          # Keyboard input and keybindings
-  minigames/      # 13 skill-based minigames
-  rendering/      # Canvas rendering (board, pieces, particles, textures)
-  screens/        # UI screens (home, game, menus, settings)
-  state/          # Global state store (settings, progress)
-  themes/         # Theme definitions and manager
-  index.html      # Entry point, loads all modules
-  main.js         # Game loop and screen router
-```
-
----
-
-## Installation
+## Getting Started
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) v20+
 - npm (comes with Node.js)
 
 ### Clone & Run
 
 ```bash
-# Clone the repository
 git clone https://github.com/iGLORM/chess.git
 cd chess
-
-# Install dependencies
 npm install
-
-# Start the game
 npm start
-# or
-npx electron .
 ```
 
 ### Linux Desktop Entry (Optional)
 
-A launcher script is included:
-
 ```bash
-# Make executable
 chmod +x launch.sh
-
-# Run
 ./launch.sh
 ```
 
 ---
 
-## Assets
+## Architecture
 
-Textures and sprites are procedurally generated at runtime using the `SpriteGen` and `TextureManager` modules. No external image assets are required for the core game.
-
-The `assets/textures/` folder contains a README for adding custom texture packs.
-
----
-
-## Development
-
-### Project Structure
+```
+src/
+  audio/          Sound and music management (Web Audio API)
+  characters/     Character definitions and manager
+  engine/         Chess engine (board, moves, rules, AI)
+    ai/           Alpha-beta search, evaluation, difficulty controller
+  input/          Keyboard input and keybindings
+  minigames/      13 skill-based capture minigames
+  rendering/      Canvas rendering (board, pieces, particles, textures)
+  screens/        UI screens (home, game, menus, settings)
+  state/          Global reactive state store
+  themes/         Theme definitions and manager
+  main.js         Game loop and screen router
+  index.html      Entry point
+```
 
 | File | Purpose |
 |:-----|:--------|
 | `main.js` | Electron main process |
-| `preload.js` | Secure preload script |
-| `src/main.js` | Game bootstrap and loop |
+| `preload.js` | Secure preload script (context isolation) |
+| `src/main.js` | Game bootstrap, loop, and screen routing |
 | `src/index.html` | Module loader |
-| `package.json` | Dependencies & scripts |
 
-### Scripts
-
-```bash
-npm start       # Launch the game
-npm test        # (No tests configured yet)
-```
+Textures and sprites are procedurally generated at runtime using the `SpriteGen` and `TextureManager` modules. The `assets/textures/` folder supports custom texture packs.
 
 ---
 
@@ -208,7 +192,6 @@ npm test        # (No tests configured yet)
 - [ ] Online multiplayer
 - [ ] More themes (Forest, Lava, Ice)
 - [ ] Additional characters with unique AI strategies
-- [ ] Sound effects and music
 - [ ] Game replay / PGN export
 - [ ] Mobile / touch support
 - [ ] Elo rating system
