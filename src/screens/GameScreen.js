@@ -89,11 +89,20 @@ const GameScreen = {
 
     audioManager.init();
     audioManager.startMusic();
+
+    // Initialize Pixi rendering
+    if (typeof PixiGameScreen !== 'undefined') {
+      PixiGameScreen.init();
+      PixiGameScreen.renderBoard(this.board, store.get('theme') || 'space');
+    }
   },
 
   destroy() {
     this.boardRenderer.clearAnimations();
     audioManager.stopMusic();
+    if (typeof PixiGameScreen !== 'undefined') {
+      PixiGameScreen.destroy();
+    }
   },
 
   saveSnapshot() {
@@ -173,18 +182,14 @@ const GameScreen = {
       this.doAIMove();
     }
 
-    this.boardRenderer.render(
-      ctx, this.board, theme,
-      this.selectedSquare,
-      this.legalMoves,
-      this.lastMove,
-      this.turn,
-      this.gameStatus,
-      false,
-      this.lockedTiles,
-      dt,
-      this.hoveredSquare
-    );
+    // Pixi handles board, pieces, backgrounds, particles
+    if (typeof PixiGameScreen !== 'undefined' && PixiGameScreen.initialized) {
+      PixiGameScreen.update(dt, {
+        board: this.board,
+        selectedSquare: this.selectedSquare,
+        legalMoves: this.legalMoves,
+      });
+    }
 
     this.renderSidePanel(ctx, cols, 'left', 'white');
     this.renderSidePanel(ctx, cols, 'right', 'black');
@@ -518,9 +523,15 @@ const GameScreen = {
     if (this.reviewingAt !== null) return;
     if (this.aiThinking) return;
 
-    const boardPos = this.boardRenderer.screenToBoard(x, y);
+    let boardPos = null;
+    if (typeof PixiGameScreen !== 'undefined' && PixiGameScreen.initialized) {
+      boardPos = PixiGameScreen.getSquareAt(x, y);
+    } else if (typeof boardRenderer !== 'undefined') {
+      boardPos = boardRenderer.screenToBoard(x, y);
+    }
     if (!boardPos) return;
-    const { row, col } = boardPos;
+    const row = boardPos.row;
+    const col = boardPos.col;
 
     if (this.lockedTiles.some(t => t.row === row && t.col === col)) {
       audioManager.playTileLock();
@@ -682,22 +693,38 @@ const GameScreen = {
       store.set('stats', stats);
 
       const theme = ThemeManager.getTheme(store.get('theme'));
-      const toScreen = this.boardRenderer.boardToScreen(move.to.row, move.to.col);
-      const cx = toScreen.x + this.boardRenderer.squareSize / 2;
-      const cy = toScreen.y + this.boardRenderer.squareSize / 2;
-      this.particleFX.captureEffect(cx, cy, theme);
+      const sqSize = 80;
+      const offsetX = 320;
+      const offsetY = 80;
+      const cx = offsetX + move.to.col * sqSize + sqSize / 2;
+      const cy = offsetY + move.to.row * sqSize + sqSize / 2;
 
-      this.boardRenderer.triggerScreenShake(8);
-      this.boardRenderer.triggerCaptureFlash(move.to.row, move.to.col);
+      if (typeof PixiGameScreen !== 'undefined' && PixiGameScreen.initialized) {
+        PixiGameScreen.spawnCaptureParticles(cx, cy, parseInt(theme.colors.accent.replace('#', '0x'), 16));
+        PixiGameScreen.shakeScreen(8);
+        PixiGameScreen.flashScreen(0xffffff);
+      } else {
+        this.particleFX.captureEffect(cx, cy, theme);
+        this.boardRenderer.triggerScreenShake(8);
+        this.boardRenderer.triggerCaptureFlash(move.to.row, move.to.col);
+      }
+
       audioManager.playCapture();
       audioManager.playScreenShake();
     } else {
       audioManager.playMove();
       const theme = ThemeManager.getTheme(store.get('theme'));
-      const toScreen = this.boardRenderer.boardToScreen(move.to.row, move.to.col);
-      const cx = toScreen.x + this.boardRenderer.squareSize / 2;
-      const cy = toScreen.y + this.boardRenderer.squareSize / 2;
-      this.particleFX.moveEffect(cx, cy, theme);
+      const sqSize = 80;
+      const offsetX = 320;
+      const offsetY = 80;
+      const cx = offsetX + move.to.col * sqSize + sqSize / 2;
+      const cy = offsetY + move.to.row * sqSize + sqSize / 2;
+
+      if (typeof PixiGameScreen !== 'undefined' && PixiGameScreen.initialized) {
+        PixiGameScreen.spawnMoveParticles(cx, cy, parseInt(theme.colors.accent.replace('#', '0x'), 16));
+      } else {
+        this.particleFX.moveEffect(cx, cy, theme);
+      }
     }
 
     move.piece = piece;

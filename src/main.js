@@ -197,8 +197,18 @@ function initApp() {
     }
   });
 
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    if (typeof PixiApp !== 'undefined') {
+      PixiApp.resize();
+    }
+  });
   resizeCanvas();
+
+  // Initialize PixiJS (for game board rendering)
+  if (typeof PixiApp !== 'undefined') {
+    PixiApp.init();
+  }
 
   switchScreen('home');
 
