@@ -351,7 +351,7 @@ const HomeScreen = {
       case '1v1':
         store.set('mode', '1v1');
         store.set('miniGamesEnabled', true);
-        switchScreen('modeSelect');
+        switchScreen('game', { mode: '1v1' });
         break;
       case 'classic':
         switchScreen('botSelect');

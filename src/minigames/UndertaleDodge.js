@@ -49,7 +49,8 @@ class UndertaleDodge {
     if (!this.running || this.done) return;
 
     // Player movement
-    const speed = 200 * dt;
+    const sens = (store.get('settings').miniGameSensitivity || 1.0);
+    const speed = 200 * dt * sens;
     if (this.keys['ArrowLeft'] || this.keys['a']) this.playerX -= speed;
     if (this.keys['ArrowRight'] || this.keys['d']) this.playerX += speed;
     if (this.keys['ArrowUp'] || this.keys['w']) this.playerY -= speed;

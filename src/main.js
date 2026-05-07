@@ -151,6 +151,28 @@ function initApp() {
     }
   });
 
+  canvas.addEventListener('mousedown', (e) => {
+    if (transition.active) return;
+    const { x, y } = getMousePos(e, canvas);
+    if (currentScreen && currentScreen.handleMouseDown) {
+      currentScreen.handleMouseDown(x, y);
+    }
+  });
+
+  canvas.addEventListener('mouseup', (e) => {
+    if (currentScreen && currentScreen.handleMouseUp) {
+      currentScreen.handleMouseUp();
+    }
+  });
+
+  canvas.addEventListener('wheel', (e) => {
+    if (transition.active) return;
+    if (currentScreen && currentScreen.handleWheel) {
+      e.preventDefault();
+      currentScreen.handleWheel(e);
+    }
+  }, { passive: false });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F11') {
       e.preventDefault();

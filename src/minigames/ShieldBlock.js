@@ -106,7 +106,7 @@ class ShieldBlock {
       return;
     }
 
-    const moveSpeed = 3.2;
+    const moveSpeed = 3.2 * (store.get('settings').shieldSensitivity || 1.0);
     if (this._keys['ArrowLeft'] || this._keys['a'] || this._keys['A']) this.shieldX -= dt * moveSpeed;
     if (this._keys['ArrowRight'] || this._keys['d'] || this._keys['D']) this.shieldX += dt * moveSpeed;
     this.shieldX = Math.max(0.1, Math.min(0.9, this.shieldX));

@@ -1,8 +1,9 @@
 const CustomGameScreen = {
-  difficulty: 5,
+  eloValue: 1000,
   playAs: 'white',
   minigameToggles: {},
   hoveredItem: null,
+  dragging: false,
   scrollOffset: 0,
 
   minigameList: [
@@ -23,51 +24,111 @@ const CustomGameScreen = {
   ],
 
   minigameIcons: {
-    quickClick: 'target',
-    memoryMatch: 'star',
-    timingStrike: 'sword',
-    patternPress: 'check',
-    reactionTest: 'target',
-    undertaleDodge: 'skull',
-    powerMeter: 'gear',
-    targetPractice: 'target',
-    dodgeFalling: 'shield',
-    rhythmTap: 'music',
-    numberGuess: 'dice',
-    coinFlip: 'dice',
-    shieldBlock: 'shield',
-    whackMole: 'sword',
+    quickClick: 'target', memoryMatch: 'star', timingStrike: 'sword',
+    patternPress: 'check', reactionTest: 'target', undertaleDodge: 'skull',
+    powerMeter: 'gear', targetPractice: 'target', dodgeFalling: 'shield',
+    rhythmTap: 'music', numberGuess: 'dice', coinFlip: 'dice',
+    shieldBlock: 'shield', whackMole: 'sword',
   },
 
   init() {
-    this.difficulty = store.get('customDifficulty') || 5;
+    const stored = store.get('customElo');
+    if (stored) {
+      this.eloValue = stored;
+    } else {
+      const diff = store.get('customDifficulty') || 5;
+      this.eloValue = 200 + (diff - 1) * 200;
+    }
     this.playAs = store.get('customPlayAs') || 'white';
     this.minigameToggles = store.get('customMinigames') || {};
     this.hoveredItem = null;
     this.scrollOffset = 0;
-
+    this.dragging = false;
     for (const mg of this.minigameList) {
-      if (this.minigameToggles[mg.key] === undefined) {
-        this.minigameToggles[mg.key] = true;
-      }
+      if (this.minigameToggles[mg.key] === undefined) this.minigameToggles[mg.key] = true;
     }
   },
 
-  destroy() {},
-
-  _roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+  eloToDifficulty(elo) {
+    return Math.max(1, Math.min(10, Math.round((elo - 200) / 200) + 1));
   },
+
+  eloToName(elo) {
+    if (elo <= 400) return 'Beginner';
+    if (elo <= 600) return 'Novice';
+    if (elo <= 800) return 'Casual';
+    if (elo <= 1000) return 'Intermediate';
+    if (elo <= 1200) return 'Skilled';
+    if (elo <= 1400) return 'Advanced';
+    if (elo <= 1600) return 'Expert';
+    if (elo <= 1800) return 'Master';
+    if (elo <= 1900) return 'Grandmaster';
+    return 'Chess 2.0';
+  },
+
+  _sliderToElo(x) {
+    const sliderX = 300;
+    const sliderW = 680;
+    const pct = Math.max(0, Math.min(1, (x - sliderX) / sliderW));
+    return Math.round((200 + pct * 1800) / 50) * 50;
+  },
+
+  _drawEloSlider(ctx, cols) {
+    const sliderX = 300;
+    const sliderY = 140;
+    const sliderW = 680;
+    const sliderH = 14;
+
+    // Label
+    ctx.fillStyle = cols.text;
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('Bot Difficulty', 50, 115);
+
+    // Elo number and name
+    ctx.fillStyle = cols.accent;
+    ctx.font = 'bold 24px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.eloValue, 640, 115);
+
+    ctx.fillStyle = cols.text + 'aa';
+    ctx.font = '12px monospace';
+    ctx.fillText(this.eloToName(this.eloValue), 780, 115);
+
+    // Track
+    ctx.fillStyle = cols.panel;
+    ctx.fillRect(sliderX, sliderY, sliderW, sliderH);
+    ctx.strokeStyle = cols.text + '44';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sliderX, sliderY, sliderW, sliderH);
+
+    // Gradient fill
+    const grad = ctx.createLinearGradient(sliderX, 0, sliderX + sliderW, 0);
+    grad.addColorStop(0, '#44dd44');
+    grad.addColorStop(0.4, '#ddaa22');
+    grad.addColorStop(0.7, '#dd6622');
+    grad.addColorStop(1, '#dd2222');
+    ctx.fillStyle = grad;
+    const fillW = ((this.eloValue - 200) / 1800) * sliderW;
+    ctx.fillRect(sliderX, sliderY, fillW, sliderH);
+
+    // Knob
+    const knobX = sliderX + fillW;
+    ctx.fillStyle = cols.text;
+    ctx.fillRect(knobX - 6, sliderY - 4, 12, sliderH + 8);
+    ctx.fillStyle = cols.accent;
+    ctx.fillRect(knobX - 4, sliderY - 2, 8, sliderH + 4);
+
+    // End labels
+    ctx.fillStyle = cols.text + '66';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('200', sliderX, sliderY + sliderH + 16);
+    ctx.textAlign = 'right';
+    ctx.fillText('2000', sliderX + sliderW, sliderY + sliderH + 16);
+  },
+
+  destroy() {},
 
   render(ctx, dt) {
     const theme = ThemeManager.getTheme(store.get('theme'));
@@ -83,141 +144,90 @@ const CustomGameScreen = {
     ctx.fillStyle = cols.text;
     ctx.font = 'bold 28px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('CUSTOM GAME', 640, 45);
+    ctx.fillText('CUSTOM GAME', 640, 40);
     ctx.fillStyle = cols.text + '77';
     ctx.font = '12px monospace';
-    ctx.fillText('Configure your own rules', 640, 70);
+    ctx.fillText('Configure your own rules', 640, 60);
+    UIHelpers.drawSeparator(ctx, 300, 70, 680, cols);
 
-    UIHelpers.drawSeparator(ctx, 300, 80, 680, cols);
+    // Elo slider
+    this._drawEloSlider(ctx, cols);
 
-    // --- Difficulty Row ---
+    // --- Play As ---
+    const playY = 185;
     ctx.fillStyle = cols.text;
     ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('Bot Difficulty', 50, 105);
+    ctx.fillText('Play As', 50, playY);
 
-    const diffNames = ['Beginner', 'Novice', 'Apprentice', 'Intermediate', 'Skilled', 'Advanced', 'Expert', 'Master', 'Grandmaster', 'Chess 2.0'];
-    const diffCardW = 108;
-    const diffGap = 8;
-    const totalDiffW = 10 * diffCardW + 9 * diffGap;
-    const diffStartX = (1280 - totalDiffW) / 2;
-    const diffY = 115;
+    const btnW = 100;
+    const btnH = 32;
+    const btnGap = 12;
+    const btnStartX = 50;
 
-    for (let i = 0; i < 10; i++) {
-      const x = diffStartX + i * (diffCardW + diffGap);
-      const level = i + 1;
-      const isSelected = this.difficulty === level;
-      const isHover = this.hoveredItem === 'diff_' + level;
-
-      UIHelpers.drawCard(ctx, x, diffY, diffCardW, 36, cols, {
-        hover: isHover,
-        active: isSelected,
-        accentStripe: isSelected ? cols.accent : null,
-      });
-
-      ctx.fillStyle = isSelected ? cols.accent : cols.text;
-      ctx.font = isSelected ? 'bold 11px monospace' : '10px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(level + '', x + diffCardW / 2, diffY + 15);
-      ctx.font = '8px monospace';
-      ctx.fillText(UIHelpers.truncateText(ctx, diffNames[i], diffCardW - 8), x + diffCardW / 2, diffY + 27);
-
-      // Difficulty color dots
-      const dotColor = UIHelpers.difficultyColor(i + 1, cols);
-      for (let d = 0; d < 5; d++) {
-        ctx.fillStyle = d < Math.ceil((i + 1) / 2) ? dotColor : cols.text + '22';
-        ctx.fillRect(x + (diffCardW - 5 * 4) / 2 + d * 4, diffY + 30, 2, 2);
-      }
-    }
-
-    // --- Play As Toggle ---
-    ctx.fillStyle = cols.text;
-    ctx.font = 'bold 14px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('Play As', 50, 185);
-
-    const toggleX = 50;
-    const toggleY = 195;
-    const toggleW = 200;
-    const toggleH = 32;
-
-    for (const [label, value, icon] of [['White', 'white', 'king'], ['Black', 'black', 'queen']]) {
-      const isSel = this.playAs === value;
-      const isHov = this.hoveredItem === 'play_' + value;
-      const offX = value === 'white' ? 0 : toggleW / 2 + 5;
-      UIHelpers.drawCard(ctx, toggleX + offX, toggleY, toggleW / 2 - 5, toggleH, cols, {
-        hover: isHov,
-        active: isSel,
-        accentStripe: isSel ? cols.accent : null,
-      });
-      UIHelpers.drawToggle(ctx, toggleX + offX + 8, toggleY + 7, 36, 18, isSel, cols);
-      UIHelpers.drawIcon(ctx, toggleX + offX + 50, toggleY + 4, icon, 12, cols, {
-        color: isSel ? cols.accent : cols.text + '55',
-      });
-      ctx.fillStyle = isSel ? cols.accent : cols.text;
-      ctx.font = isSel ? 'bold 13px monospace' : '12px monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(label, toggleX + offX + 66, toggleY + 22);
-    }
+    UIHelpers.drawButton(ctx, btnStartX, playY + 10, btnW, btnH, 'White', cols, {
+      font: 'bold 12px monospace',
+      active: this.playAs === 'white',
+    });
+    UIHelpers.drawButton(ctx, btnStartX + btnW + btnGap, playY + 10, btnW, btnH, 'Black', cols, {
+      font: 'bold 12px monospace',
+      active: this.playAs === 'black',
+    });
 
     // --- Minigame Toggles ---
+    const mgLabelY = playY + 65;
     ctx.fillStyle = cols.text;
     ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('Minigames', 50, 260);
+    ctx.fillText('Minigames', 50, mgLabelY);
 
     const enabledCount = Object.values(this.minigameToggles).filter(v => v).length;
     ctx.fillStyle = cols.text + '77';
     ctx.font = '11px monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(enabledCount + '/' + this.minigameList.length + ' active', 1230, 260);
+    ctx.fillText(enabledCount + '/' + this.minigameList.length + ' active', 1230, mgLabelY);
 
-    // Select All / Deselect All buttons
-    const saX = 1230 - 200;
-    const saY = 272;
-    UIHelpers.drawButton(ctx, saX, saY, 90, 24, 'All On', cols, { font: 'bold 10px monospace' });
-    UIHelpers.drawButton(ctx, saX + 100, saY, 90, 24, 'All Off', cols, { font: 'bold 10px monospace' });
+    // All On / All Off
+    UIHelpers.drawButton(ctx, 1230 - 200, mgLabelY + 8, 90, 22, 'All On', cols, { font: 'bold 10px monospace' });
+    UIHelpers.drawButton(ctx, 1230 - 100, mgLabelY + 8, 90, 22, 'All Off', cols, { font: 'bold 10px monospace' });
 
-    const mgStartY = 302;
-    const mgLineH = 36;
-    const mgCols = 2;
+    // 2-column grid with better spacing
+    const mgStartY = mgLabelY + 40;
+    const mgLineH = 40;
     const mgColW = 580;
     const mgCol1X = 50;
     const mgCol2X = 660;
 
     for (let i = 0; i < this.minigameList.length; i++) {
       const mg = this.minigameList[i];
-      const c = i % mgCols;
-      const r = Math.floor(i / mgCols);
+      const c = i % 2;
+      const r = Math.floor(i / 2);
       const bx = c === 0 ? mgCol1X : mgCol2X;
       const by = mgStartY + r * mgLineH;
       const isOn = this.minigameToggles[mg.key];
       const isHov = this.hoveredItem === 'mg_' + mg.key;
 
-      UIHelpers.drawCard(ctx, bx, by, mgColW, 30, cols, {
+      UIHelpers.drawCard(ctx, bx, by, mgColW, 34, cols, {
         hover: isHov,
         active: isOn,
         accentStripe: isOn ? cols.accent : null,
       });
 
-      // Toggle switch
-      UIHelpers.drawToggle(ctx, bx + 8, by + 6, 36, 18, isOn, cols);
+      UIHelpers.drawToggle(ctx, bx + 8, by + 8, 36, 18, isOn, cols);
 
-      // Minigame icon
       const iconType = this.minigameIcons[mg.key] || 'check';
-      UIHelpers.drawIcon(ctx, bx + 50, by + 6, iconType, 8, cols, {
+      UIHelpers.drawIcon(ctx, bx + 52, by + 8, iconType, 8, cols, {
         color: isOn ? cols.accent : cols.text + '55',
       });
 
       ctx.fillStyle = isOn ? cols.text : cols.text + '55';
       ctx.font = isHov ? 'bold 13px monospace' : '12px monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(mg.name, bx + 64, by + 20);
+      ctx.fillText(mg.name, bx + 66, by + 22);
     }
 
-    // --- Bottom Bar ---
+    // Bottom bar
     UIHelpers.drawPanel(ctx, 0, 710, 1280, 90, cols);
-
     UIHelpers.drawButton(ctx, 30, 730, 160, 40, '< Back', cols, { font: 'bold 14px monospace' });
     UIHelpers.drawButton(ctx, 1280 - 250, 725, 220, 50, 'START GAME', cols, {
       font: 'bold 18px monospace',
@@ -227,21 +237,19 @@ const CustomGameScreen = {
     ctx.fillStyle = cols.text + '55';
     ctx.font = '11px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('Level ' + this.difficulty + ' bot  |  Play as ' + this.playAs + '  |  ' + enabledCount + ' minigames', 640, 770);
-
+    ctx.fillText(this.eloValue + ' ELO  |  Play as ' + this.playAs + '  |  ' + enabledCount + ' minigames', 640, 770);
     UIHelpers.drawDitheredRect(ctx, 0, 770, 1280, 30, cols.accent, '11');
   },
 
   handleClick(x, y) {
-    // Back button
     if (x >= 30 && x <= 190 && y >= 730 && y <= 770) {
       switchScreen('home');
       return;
     }
 
-    // Start button
     if (x >= 1280 - 250 && x <= 1280 - 30 && y >= 725 && y <= 775) {
-      store.set('customDifficulty', this.difficulty);
+      store.set('customElo', this.eloValue);
+      store.set('customDifficulty', this.eloToDifficulty(this.eloValue));
       store.set('customPlayAs', this.playAs);
       store.set('customMinigames', { ...this.minigameToggles });
       store.set('mode', 'custom');
@@ -251,61 +259,49 @@ const CustomGameScreen = {
       return;
     }
 
-    // Difficulty cards
-    const diffCardW = 108;
-    const diffGap = 8;
-    const totalDiffW = 10 * diffCardW + 9 * diffGap;
-    const diffStartX = (1280 - totalDiffW) / 2;
-    const diffY = 115;
-    for (let i = 0; i < 10; i++) {
-      const cx = diffStartX + i * (diffCardW + diffGap);
-      if (x >= cx && x <= cx + diffCardW && y >= diffY && y <= diffY + 36) {
-        this.difficulty = i + 1;
-        return;
-      }
+    // Elo slider
+    if (x >= 300 && x <= 980 && y >= 136 && y <= 158) {
+      this.eloValue = this._sliderToElo(x);
+      this.dragging = true;
+      return;
     }
 
-    // Play As toggle
-    const toggleX = 50;
-    const toggleY = 195;
-    const toggleW = 200;
-    const toggleH = 32;
-    if (y >= toggleY && y <= toggleY + toggleH) {
-      if (x >= toggleX && x <= toggleX + toggleW / 2 - 5) {
-        this.playAs = 'white';
-        return;
-      }
-      if (x >= toggleX + toggleW / 2 + 5 && x <= toggleX + toggleW) {
-        this.playAs = 'black';
-        return;
-      }
+    // Play As
+    const playY = 195;
+    const btnW = 100;
+    const btnH = 32;
+    const btnGap = 12;
+    if (x >= 50 && x <= 50 + btnW && y >= playY && y <= playY + btnH) {
+      this.playAs = 'white';
+      return;
+    }
+    if (x >= 50 + btnW + btnGap && x <= 50 + btnW * 2 + btnGap && y >= playY && y <= playY + btnH) {
+      this.playAs = 'black';
+      return;
     }
 
-    // Select All / Deselect All
+    // All On / All Off
+    const mgLabelY = 250;
     const saX = 1230 - 200;
-    const saY = 272;
-    if (x >= saX && x <= saX + 90 && y >= saY && y <= saY + 24) {
+    if (x >= saX && x <= saX + 90 && y >= mgLabelY + 8 && y <= mgLabelY + 30) {
       for (const mg of this.minigameList) this.minigameToggles[mg.key] = true;
       return;
     }
-    if (x >= saX + 100 && x <= saX + 190 && y >= saY && y <= saY + 24) {
+    if (x >= saX + 100 && x <= saX + 190 && y >= mgLabelY + 8 && y <= mgLabelY + 30) {
       for (const mg of this.minigameList) this.minigameToggles[mg.key] = false;
       return;
     }
 
     // Minigame toggles
-    const mgStartY = 302;
-    const mgLineH = 36;
-    const mgCols = 2;
+    const mgStartY = mgLabelY + 40;
+    const mgLineH = 40;
     const mgColW = 580;
-    const mgCol1X = 50;
-    const mgCol2X = 660;
     for (let i = 0; i < this.minigameList.length; i++) {
-      const c = i % mgCols;
-      const r = Math.floor(i / mgCols);
-      const bx = c === 0 ? mgCol1X : mgCol2X;
+      const c = i % 2;
+      const r = Math.floor(i / 2);
+      const bx = c === 0 ? 50 : 660;
       const by = mgStartY + r * mgLineH;
-      if (x >= bx && x <= bx + mgColW && y >= by && y <= by + 30) {
+      if (x >= bx && x <= bx + mgColW && y >= by && y <= by + 34) {
         this.minigameToggles[this.minigameList[i].key] = !this.minigameToggles[this.minigameList[i].key];
         return;
       }
@@ -313,62 +309,46 @@ const CustomGameScreen = {
   },
 
   handleMouseMove(x, y) {
-    this.hoveredItem = null;
-    const canvas = document.getElementById('gameCanvas');
-
-    // Difficulty cards
-    const diffCardW = 108;
-    const diffGap = 8;
-    const totalDiffW = 10 * diffCardW + 9 * diffGap;
-    const diffStartX = (1280 - totalDiffW) / 2;
-    const diffY = 115;
-    for (let i = 0; i < 10; i++) {
-      const cx = diffStartX + i * (diffCardW + diffGap);
-      if (x >= cx && x <= cx + diffCardW && y >= diffY && y <= diffY + 36) {
-        this.hoveredItem = 'diff_' + (i + 1);
-        canvas.style.cursor = 'pointer';
-        return;
-      }
-    }
-
-    // Play As toggle
-    const toggleX = 50;
-    const toggleY = 195;
-    const toggleW = 200;
-    const toggleH = 32;
-    if (y >= toggleY && y <= toggleY + toggleH && x >= toggleX && x <= toggleX + toggleW) {
-      this.hoveredItem = 'play_' + (x < toggleX + toggleW / 2 ? 'white' : 'black');
-      canvas.style.cursor = 'pointer';
+    if (this.dragging) {
+      this.eloValue = this._sliderToElo(x);
       return;
     }
+    this.hoveredItem = null;
+    const canvas = document.getElementById('gameCanvas');
+    canvas.style.cursor = 'default';
 
-    // Minigame toggles
-    const mgStartY = 302;
-    const mgLineH = 36;
-    const mgCols = 2;
+    // Minigame toggles hover
+    const mgStartY = 290;
+    const mgLineH = 40;
     const mgColW = 580;
-    const mgCol1X = 50;
-    const mgCol2X = 660;
     for (let i = 0; i < this.minigameList.length; i++) {
-      const c = i % mgCols;
-      const r = Math.floor(i / mgCols);
-      const bx = c === 0 ? mgCol1X : mgCol2X;
+      const c = i % 2;
+      const r = Math.floor(i / 2);
+      const bx = c === 0 ? 50 : 660;
       const by = mgStartY + r * mgLineH;
-      if (x >= bx && x <= bx + mgColW && y >= by && y <= by + 30) {
+      if (x >= bx && x <= bx + mgColW && y >= by && y <= by + 34) {
         this.hoveredItem = 'mg_' + this.minigameList[i].key;
         canvas.style.cursor = 'pointer';
         return;
       }
     }
 
-    // Start/back buttons
     if ((x >= 1280 - 250 && x <= 1280 - 30 && y >= 725 && y <= 775) ||
-        (x >= 30 && x <= 190 && y >= 730 && y <= 770)) {
+        (x >= 30 && x <= 190 && y >= 730 && y <= 770) ||
+        (x >= 300 && x <= 980 && y >= 136 && y <= 158)) {
       canvas.style.cursor = 'pointer';
-      return;
     }
+  },
 
-    canvas.style.cursor = 'default';
+  handleMouseDown(x, y) {
+    if (x >= 300 && x <= 980 && y >= 130 && y <= 165) {
+      this.dragging = true;
+      this.eloValue = this._sliderToElo(x);
+    }
+  },
+
+  handleMouseUp() {
+    this.dragging = false;
   },
 
   handleKeyDown(e) {
@@ -376,5 +356,7 @@ const CustomGameScreen = {
       switchScreen('home');
       return;
     }
+    if (e.key === 'ArrowLeft') this.eloValue = Math.max(200, this.eloValue - 50);
+    if (e.key === 'ArrowRight') this.eloValue = Math.min(2000, this.eloValue + 50);
   },
 };

@@ -15,6 +15,9 @@ const SettingsScreen = {
   },
 
   buildOptions() {
+    // Initialize default mini game sensitivity
+    if (this.settings.miniGameSensitivity == null) this.settings.miniGameSensitivity = 1.0;
+    if (this.settings.shieldSensitivity == null) this.settings.shieldSensitivity = 1.0;
     this.options = [
       {
         label: 'Practice Mini-Games',
@@ -56,6 +59,30 @@ const SettingsScreen = {
           this.settings.sfxVolume = Math.max(0, Math.min(1, current + delta));
           store.set('settings', this.settings);
           audioManager.setSFXVolume(this.settings.sfxVolume);
+          store.saveProgress();
+        },
+      },
+      {
+        label: 'Dodge Sensitivity',
+        value: () => Math.round((this.settings.miniGameSensitivity || 1.0) * 100) + '%',
+        isSlider: true,
+        sliderValue: () => this.settings.miniGameSensitivity || 1.0,
+        sliderAdjust: (delta) => {
+          const current = this.settings.miniGameSensitivity || 1.0;
+          this.settings.miniGameSensitivity = Math.max(0.5, Math.min(2.0, current + delta));
+          store.set('settings', this.settings);
+          store.saveProgress();
+        },
+      },
+      {
+        label: 'Shield Sensitivity',
+        value: () => Math.round((this.settings.shieldSensitivity || 1.0) * 100) + '%',
+        isSlider: true,
+        sliderValue: () => this.settings.shieldSensitivity || 1.0,
+        sliderAdjust: (delta) => {
+          const current = this.settings.shieldSensitivity || 1.0;
+          this.settings.shieldSensitivity = Math.max(0.5, Math.min(2.0, current + delta));
+          store.set('settings', this.settings);
           store.saveProgress();
         },
       },
@@ -130,7 +157,7 @@ const SettingsScreen = {
       }
 
       // Icon
-      const iconMap = { 'Practice Mini-Games': 'target', 'Audio': 'music', 'Music Volume': 'volume', 'SFX Volume': 'volume', 'Player 1 Name': 'king', 'Player 2 Name': 'king', 'Reset Progress': 'skull' };
+      const iconMap = { 'Practice Mini-Games': 'target', 'Audio': 'music', 'Music Volume': 'volume', 'SFX Volume': 'volume', 'Dodge Sensitivity': 'keyboard', 'Shield Sensitivity': 'shield', 'Player 1 Name': 'king', 'Player 2 Name': 'king', 'Reset Progress': 'skull' };
       if (iconMap[opt.label]) {
         UIHelpers.drawIcon(ctx, 300 + 290, y + 22, iconMap[opt.label], 10, cols);
       }
@@ -360,7 +387,8 @@ const SettingsScreen = {
       const opt = this.options[this.selectedOption];
       if (opt && opt.isSlider) {
         e.preventDefault();
-        opt.sliderAdjust(e.key === 'ArrowLeft' ? -0.05 : 0.05);
+        const step = opt.label.includes('Sensitivity') ? 0.1 : 0.05;
+        opt.sliderAdjust(e.key === 'ArrowLeft' ? -step : step);
       }
     }
   },

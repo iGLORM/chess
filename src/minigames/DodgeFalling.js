@@ -73,7 +73,8 @@ class DodgeFalling {
     }
 
     // Movement
-    const speed = 200 * dt;
+    const sens = (store.get('settings').miniGameSensitivity || 1.0);
+    const speed = 160 * dt * sens;
     if (this.keys['ArrowLeft'] || this.keys['a']) this.playerX -= speed;
     if (this.keys['ArrowRight'] || this.keys['d']) this.playerX += speed;
     this.playerX = Math.max(20, Math.min(620, this.playerX));
@@ -209,8 +210,8 @@ class DodgeFalling {
   }
 
   handleKey(key) {
-    if (key === 'ArrowLeft' || key === 'a') this.playerX -= 30;
-    if (key === 'ArrowRight' || key === 'd') this.playerX += 30;
+    if (key === 'ArrowLeft' || key === 'a') this.playerX -= 15;
+    if (key === 'ArrowRight' || key === 'd') this.playerX += 15;
   }
 
   render(ctx, x, y, w, h) {
