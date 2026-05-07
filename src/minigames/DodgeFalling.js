@@ -80,7 +80,7 @@ class DodgeFalling {
 
     // Spawn blocks
     this.spawnTimer += dt;
-    const rate = Math.max(0.2, 0.6 - this.difficulty * 0.08);
+    const rate = Math.max(0.15, 0.6 - this.difficulty * 0.05);
     if (this.spawnTimer >= rate) {
       this.spawnTimer = 0;
       const bw = 30 + Math.random() * 40;
@@ -89,7 +89,7 @@ class DodgeFalling {
         y: -20,
         w: bw,
         h: 15,
-        speed: 120 + this.difficulty * 30,
+        speed: 100 + this.difficulty * 20,
         hue: Math.random(),
       });
     }
@@ -116,9 +116,12 @@ class DodgeFalling {
         this.blocks.splice(i, 1);
         continue;
       }
-      // Collision with player
-      if (b.y + b.h > 240 && b.y < 260 &&
-          b.x < this.playerX + 15 && b.x + b.w > this.playerX - 15) {
+      // Collision with player — tight hitbox matching the character sprite
+      const playerTop = 245;
+      const playerBottom = 258;
+      const playerHalfW = 9;
+      if (b.y + b.h > playerTop && b.y < playerBottom &&
+          b.x + b.w > this.playerX - playerHalfW && b.x < this.playerX + playerHalfW) {
         this.hp--;
         this.shakeTimer = 0.15;
         this.flashTimer = 0.15;

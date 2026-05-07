@@ -29,7 +29,7 @@ class ShieldBlock {
     this.difficulty = difficulty;
     this.isDuel = isDuel;
     this.shieldX = 0.5;
-    this.shieldW = isDuel ? 70 : 90 - difficulty * 5;
+    this.shieldW = isDuel ? 70 : Math.max(40, 90 - difficulty * 5);
     this.hp = isDuel ? 25 : 20;
     this.maxHp = this.hp;
     this.timer = 0;

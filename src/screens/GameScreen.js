@@ -220,6 +220,18 @@ const GameScreen = {
       else if (this.gameStatus === 'resigned') reason = 'by Resignation';
       if (reason) ctx.fillText(reason, 640, 300);
 
+      // Rating change display
+      const rStats = store.get('stats');
+      const rHistory = rStats.ratingHistory || [];
+      if (rHistory.length > 0) {
+        const lastEntry = rHistory[rHistory.length - 1];
+        const changeStr = lastEntry.change > 0 ? ('+' + lastEntry.change) : String(lastEntry.change);
+        ctx.fillStyle = lastEntry.change > 0 ? '#44dd44' : lastEntry.change < 0 ? '#dd4444' : cols.text + '88';
+        ctx.font = 'bold 18px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Rating: ' + rStats.rating + ' (' + changeStr + ')', 640, 320);
+      }
+
       if (this.gameResult && this.currentCharacter) {
         ctx.fillStyle = cols.text + 'aa';
         ctx.font = '16px monospace';
@@ -866,6 +878,20 @@ const GameScreen = {
     if (this.gameResult === 'white') stats.wins++;
     else if (this.gameResult === 'black') stats.losses++;
     else stats.draws++;
+
+    // Elo-like rating calculation
+    const aiDifficulty = store.get('customDifficulty') || 5;
+    const aiRating = 400 + (aiDifficulty - 1) * 200; // Level 1=400, Level 10=2200
+    const playerRating = stats.rating || 1200;
+    const expectedScore = 1 / (1 + Math.pow(10, (aiRating - playerRating) / 400));
+    const actualScore = this.gameResult === 'white' ? 1 : (this.gameResult === 'draw' ? 0.5 : 0);
+    const kFactor = 32;
+    const ratingChange = Math.round(kFactor * (actualScore - expectedScore));
+    stats.rating = Math.max(100, playerRating + ratingChange);
+    if (!stats.ratingHistory) stats.ratingHistory = [];
+    stats.ratingHistory.push({ rating: stats.rating, change: ratingChange, result: this.gameResult });
+    if (stats.ratingHistory.length > 50) stats.ratingHistory = stats.ratingHistory.slice(-50);
+
     store.set('stats', stats);
 
     if (this.mode === 'story' && this.gameResult === 'white') {

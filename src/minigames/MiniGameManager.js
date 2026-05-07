@@ -43,16 +43,14 @@ class MiniGameManager {
   }
 
   static calculateDifficulty(attacker, defender, boardPos) {
-    const values = { pawn: 1, knight: 2, bishop: 2, rook: 3, queen: 5, king: 5 };
+    const values = { pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 8, king: 8 };
     let diff = values[defender.type] || 1;
     if (defender.type === 'pawn') {
       const rank = defender.color === 'white' ? boardPos.row : 7 - boardPos.row;
-      if (rank <= 2) diff += 3;
-      else if (rank <= 4) diff += 1;
+      if (rank <= 2) diff += 4;
+      else if (rank <= 4) diff += 2;
     }
-    if (defender.type === 'queen') diff = 5;
-    if (defender.type === 'king') diff = 5;
-    return Math.min(5, Math.max(1, diff));
+    return Math.min(10, Math.max(1, diff));
   }
 
   static shouldTriggerMiniGame() {
@@ -87,7 +85,6 @@ class MiniGameManager {
     }
 
     audioManager.init();
-    audioManager.stopMusic();
 
     const difficulty = MiniGameManager.calculateDifficulty(attacker, defender, boardPos);
     this.isDuel = MiniGameManager.isDuel(attacker, defender);
@@ -132,7 +129,6 @@ class MiniGameManager {
 
   startPracticeMiniGame(gameType, callback) {
     audioManager.init();
-    audioManager.stopMusic();
 
     const difficulty = 2;
     this.isDuel = false;
@@ -341,8 +337,6 @@ class MiniGameManager {
     if (this.currentGame && this.currentGame.cleanup) {
       this.currentGame.cleanup();
     }
-
-    audioManager.startMusic();
 
     if (this.callback) {
       const winner = this.currentGame ? this.currentGame.winner : 'attacker';

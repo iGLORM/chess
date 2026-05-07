@@ -15,17 +15,20 @@ class UndertaleDodge {
     this.spawnTimer = 0;
     this.keys = {};
     this.running = false;
+    this.difficulty = 1;
   }
 
-  init(attacker, defender) {
+  init(attacker, defender, difficulty, isDuel) {
     this.done = false;
     this.winner = null;
     this.playerX = 320;
     this.playerY = 240;
     this.playerSize = 14;
     this.bullets = [];
-    this.hp = 20;
-    this.maxHp = 20;
+    this.difficulty = difficulty || 1;
+    // Scale difficulty: more HP for easy, faster bullets for hard
+    this.hp = isDuel ? 25 : Math.max(10, 20 - this.difficulty);
+    this.maxHp = this.hp;
     this.timeLeft = this.survivalTime;
     this.phase = 0;
     this.spawnTimer = 0;
@@ -115,6 +118,7 @@ class UndertaleDodge {
 
   spawnBullets() {
     const arena = { x: 200, y: 140, w: 240, h: 200 };
+    const diffBonus = (this.difficulty - 1) * 10;
 
     switch (this.phase % 4) {
       case 0: // Left-right waves
@@ -123,7 +127,7 @@ class UndertaleDodge {
           this.bullets.push({
             x: fromLeft ? arena.x - 10 : arena.x + arena.w + 10,
             y: arena.y + 30 + i * 60,
-            vx: fromLeft ? 80 + this.phase * 20 : -(80 + this.phase * 20),
+            vx: fromLeft ? 80 + this.phase * 20 + diffBonus : -(80 + this.phase * 20 + diffBonus),
             vy: 0,
             size: 6,
             color: '#ff6666',
@@ -137,7 +141,7 @@ class UndertaleDodge {
             x: arena.x + 30 + i * 80,
             y: fromTop ? arena.y - 10 : arena.y + arena.h + 10,
             vx: 0,
-            vy: fromTop ? 80 + this.phase * 20 : -(80 + this.phase * 20),
+            vy: fromTop ? 80 + this.phase * 20 + diffBonus : -(80 + this.phase * 20 + diffBonus),
             size: 6,
             color: '#ffaa44',
           });
@@ -146,11 +150,12 @@ class UndertaleDodge {
       case 2: // Diagonal
         for (let i = 0; i < 4; i++) {
           const angle = Math.PI / 4 + i * Math.PI / 2 + Math.random() * 0.3;
+          const spd = 60 + this.phase * 15 + diffBonus;
           this.bullets.push({
             x: arena.x + arena.w / 2,
             y: arena.y + arena.h / 2,
-            vx: Math.cos(angle) * (60 + this.phase * 15),
-            vy: Math.sin(angle) * (60 + this.phase * 15),
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
             size: 5,
             color: '#ff44ff',
           });
@@ -159,7 +164,7 @@ class UndertaleDodge {
       case 3: // Spiral
         for (let i = 0; i < 6; i++) {
           const angle = (i / 6) * Math.PI * 2 + Date.now() / 1000;
-          const speed = 50 + this.phase * 10;
+          const speed = 50 + this.phase * 10 + diffBonus;
           this.bullets.push({
             x: arena.x + arena.w / 2,
             y: arena.y + arena.h / 2,

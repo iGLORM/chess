@@ -108,9 +108,9 @@ class AudioManager {
     const beat = 60 / bpm;
     const now = this.ctx.currentTime;
 
-    // Schedule 4 bars ahead, alternating A/B sections every 4 bars
+    // Schedule 4 bars ahead, alternating A/B sections every ~2 minutes (40 bars)
     while (this.nextLoopTime < now + 4 * beat * 4) {
-      const section = Math.floor(this.barCount / 4) % 2 === 0 ? 'A' : 'B';
+      const section = Math.floor(this.barCount / 40) % 2 === 0 ? 'A' : 'B';
       if (section === 'A') {
         this._playBar(this.nextLoopTime, beat, this.barCount);
       } else {
