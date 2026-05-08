@@ -46,32 +46,32 @@ const PixiParticleFX = {
   },
 
   _spawnShockwave(x, y, color) {
-    const ring = new PIXI.Graphics();
     const fillColor = typeof color === 'string' ? parseInt(color.replace('#', '0x'), 16) : color;
-    ring.lineStyle(3, fillColor, 0.8);
-    ring.drawCircle(0, 0, 10);
+
+    const ring = new PIXI.Graphics();
+    ring.circle(0, 0, 10).stroke({ width: 3, color: fillColor, alpha: 0.8 });
     ring.x = x;
     ring.y = y;
     this.container.addChild(ring);
 
-    const sw = {
+    this.shockwaves.push({
       sprite: ring,
+      color: fillColor,
       life: 0,
       maxLife: 0.5,
       startRadius: 10,
       endRadius: 120,
-    };
-    this.shockwaves.push(sw);
+    });
 
-    // Secondary ring
     const ring2 = new PIXI.Graphics();
-    ring2.lineStyle(1, 0xffffff, 0.5);
-    ring2.drawCircle(0, 0, 10);
+    ring2.circle(0, 0, 10).stroke({ width: 1, color: 0xffffff, alpha: 0.5 });
     ring2.x = x;
     ring2.y = y;
     this.container.addChild(ring2);
+
     this.shockwaves.push({
       sprite: ring2,
+      color: 0xffffff,
       life: 0,
       maxLife: 0.7,
       startRadius: 10,
@@ -116,9 +116,7 @@ const PixiParticleFX = {
       const p = new PIXI.Graphics();
       const size = 1.5 + Math.random() * 2.5;
       const variant = Math.random() > 0.8 ? 0xffffff : color;
-      p.beginFill(variant, 0.95);
-      p.drawRect(-size / 2, -size / 2, size, size);
-      p.endFill();
+      p.rect(-size / 2, -size / 2, size, size).fill({ color: variant, alpha: 0.95 });
       p.x = x;
       p.y = y;
 
@@ -136,11 +134,8 @@ const PixiParticleFX = {
       this.particles.push(p);
     }
 
-    // Flash
     const flash = new PIXI.Graphics();
-    flash.beginFill(color, 0.3);
-    flash.drawCircle(0, 0, 40);
-    flash.endFill();
+    flash.circle(0, 0, 40).fill({ color, alpha: 0.3 });
     flash.x = x;
     flash.y = y;
     this.container.addChild(flash);
@@ -156,9 +151,7 @@ const PixiParticleFX = {
     const p = new PIXI.Graphics();
     const size = 2 + Math.random() * 2;
     const fillColor = typeof color === 'string' ? parseInt(color.replace('#', '0x'), 16) : color;
-    p.beginFill(fillColor, 0.4);
-    p.drawRect(-size / 2, -size / 2, size, size);
-    p.endFill();
+    p.rect(-size / 2, -size / 2, size, size).fill({ color: fillColor, alpha: 0.4 });
     p.x = x;
     p.y = y;
     p.vx = 0;
@@ -196,9 +189,7 @@ const PixiParticleFX = {
       const alpha = Math.max(0, 1 - progress);
 
       sw.sprite.clear();
-      const fillColor = sw.sprite.line.color;
-      sw.sprite.lineStyle(3 * (1 - progress), fillColor, alpha * 0.8);
-      sw.sprite.drawCircle(0, 0, radius);
+      sw.sprite.circle(0, 0, radius).stroke({ width: 3 * (1 - progress), color: sw.color, alpha: alpha * 0.8 });
 
       if (sw.life >= sw.maxLife) {
         this.container.removeChild(sw.sprite);

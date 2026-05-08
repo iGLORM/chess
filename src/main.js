@@ -68,15 +68,18 @@ function gameLoop(timestamp) {
   ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
   ctx.clearRect(0, 0, 1280, 800);
 
-  if (currentScreen && currentScreen.isPixiScreen) {
-    if (currentScreen.pixiUpdate) currentScreen.pixiUpdate(dt);
-  } else if (currentScreen && currentScreen.render) {
-    currentScreen.render(ctx, dt);
-  }
+  try {
+    if (currentScreen && currentScreen.isPixiScreen) {
+      if (currentScreen.pixiUpdate) currentScreen.pixiUpdate(dt);
+    } else if (currentScreen && currentScreen.render) {
+      currentScreen.render(ctx, dt);
+    }
 
-  // Render pause menu on top of game screen
-  if (PauseMenu.visible) {
-    PauseMenu.render(ctx, dt);
+    if (PauseMenu.visible) {
+      PauseMenu.render(ctx, dt);
+    }
+  } catch (e) {
+    console.error('Game loop error:', e);
   }
 
   // Screen transition fade

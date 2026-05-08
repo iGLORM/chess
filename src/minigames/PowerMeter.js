@@ -32,10 +32,24 @@ class PowerMeter {
     this.shakeTimer = 0;
     this.shakeX = 0;
     this.shakeY = 0;
+    this.elapsed = 0;
+    this.timeLimit = isDuel ? 8 : 6;
     if (audioManager) audioManager.playMiniGameStart();
   }
 
   update(dt) {
+    if (!this.done) {
+      this.elapsed += dt;
+      if (this.elapsed >= this.timeLimit) {
+        this.done = true;
+        this.winner = this.score >= (60 + this.difficulty * 15) ? 'attacker' : 'defender';
+        if (audioManager) {
+          if (this.winner === 'attacker') audioManager.playMiniGameWin();
+          else audioManager.playMiniGameLose();
+        }
+        return;
+      }
+    }
     if (!this.done && this.attempts < this.maxAttempts) {
       if (this.rising) {
         this.power += this.speed * dt * 60;
