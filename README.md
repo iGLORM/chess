@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/Electron-28-47848F?logo=electron&logoColor=white" alt="Electron" />
   <img src="https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/PixiJS-v8-E91E63?logo=webgl&logoColor=white" alt="PixiJS v8" />
   <img src="https://img.shields.io/badge/Canvas-2D-E34F26?logo=html5&logoColor=white" alt="HTML5 Canvas" />
   <img src="https://img.shields.io/badge/License-Open%20Source-88d8b0" alt="License" />
   <img src="https://img.shields.io/badge/AI%20Engine-Alpha--Beta%20Pruning-fff5a0?logoColor=black" alt="AI Engine" />
@@ -30,13 +31,17 @@
 
 <p align="center">
 
-| Home Screen | Bot Select | Character Select |
+| Home Screen | Settings | Character Select |
 |:---:|:---:|:---:|
-| ![Home Screen](assets/screenshots/home_screen.png) | ![Bot Select](assets/screenshots/bot_select.png) | ![Character Select](assets/screenshots/character_select.png) |
+| ![Home Screen](assets/screenshots/home_screen.png) | ![Settings](assets/screenshots/settings.png) | ![Character Select](assets/screenshots/character_select.png) |
 
-| Theme Select | Game Screen | Pause Menu |
+| Bot Select | Custom Game | How to Play |
 |:---:|:---:|:---:|
-| ![Theme Select](assets/screenshots/theme_select.png) | ![Game Screen](assets/screenshots/game_screen.png) | ![Pause Menu](assets/screenshots/pause_menu.png) |
+| ![Bot Select](assets/screenshots/bot_select.png) | ![Custom Game](assets/screenshots/custom_game.png) | ![How to Play](assets/screenshots/how_to_play.png) |
+
+| Stats | Game Screen | Theme Select |
+|:---:|:---:|:---:|
+| ![Stats](assets/screenshots/stats.png) | ![Game Screen](assets/screenshots/game_screen.png) | ![Theme Select](assets/screenshots/theme_select.png) |
 
 </p>
 
@@ -52,7 +57,8 @@
 | **Dynamic Themes** | 3+ visual styles (Space, Medieval, Ocean) with unique color palettes and unlockable themes |
 | **Character System** | Each opponent has unique dialogue, colors, and AI personality |
 | **Capture Minigames** | 14 skill-based minigames trigger on piece captures for bonus rewards |
-| **Particle Effects** | Animated stars, explosions, and visual feedback |
+| **PixiJS v8 Rendering** | GPU-accelerated home screen, board, and UI with GSAP animations |
+| **Heavy Background FX** | Parallax fog, themed particles (bubbles, embers, blossoms, shooting stars), pulsing glows |
 | **Save System** | Persistent settings, unlocked themes, and progress tracking via localStorage |
 | **Custom Engine** | Full legal move generation, check/checkmate detection, and AI search with alpha-beta pruning |
 | **Fullscreen** | Toggle fullscreen mode with F11 |
@@ -91,11 +97,19 @@ Switch between visual themes that change the entire board, pieces, UI, and backg
 
 | Theme | Name | Description |
 |:-----:|:-----|:------------|
-| `space` | Cosmic Abyss | Rainbow road in the cosmos |
-| `medieval` | King's Fortress | Brick blocks and flags |
-| `ocean` | Deep Blue | Bubbles and coral pipes |
+| `space` | Cosmic Abyss | Twinkling stars, shooting stars, nebula glows |
+| `medieval` | King's Fortress | Floating embers, torch glow pulses |
+| `ocean` | Deep Blue | Rising bubbles, underwater light rays |
+| `japanese` | Cherry Blossom | Falling cherry blossoms with rotation |
+| `crystal` | Crystal Cavern | Sparkling crystal flashes |
+| `cyberpunk` | Neon Grid | Data streaks, digital rain |
+| `egypt` | Desert Sun | Drifting sand, heat shimmer |
+| `steampunk` | Brass Works | Rising steam wisps, rotating gears |
+| `prehistoric` | Lost World | Floating spores, mist banks |
+| `artdeco` | Golden Age | Geometric gold shapes |
+| `wildwest` | Dusty Trail | Blowing dust particles |
 
-Themes affect board colors, piece colors, highlights, backgrounds, buttons, panels, text, and particle effects. Additional themes can be unlocked through gameplay.
+Each theme has a matching title logo variant (original, magma, or ice). Themes affect board, pieces, UI, backgrounds, particles, and buttons. 12 themes total, unlockable through gameplay.
 
 ---
 
@@ -157,6 +171,13 @@ Pre-built binaries are available on the [Releases](https://github.com/iGLORM/che
 - [Node.js](https://nodejs.org/) v20+
 - npm (comes with Node.js)
 
+#### Dependencies (auto-installed via npm)
+
+- **Electron** — Desktop app framework
+- **PixiJS v8** — GPU-accelerated 2D rendering (loaded via CDN)
+- **GSAP** — Animation library (loaded via CDN)
+- **@chenglou/pretext** — Accurate text measurement for Canvas 2D text fitting
+
 #### Run in Development
 
 ```bash
@@ -199,8 +220,9 @@ src/
   engine/         Chess engine (board, moves, rules, AI)
     ai/           Alpha-beta search, evaluation, difficulty controller
   input/          Keyboard input and keybindings
-  minigames/      13 skill-based capture minigames
-  rendering/      Canvas rendering (board, pieces, particles, textures)
+  minigames/      14 skill-based capture minigames
+  pixi/           PixiJS v8 renderers (board, pieces, backgrounds, UI components)
+  rendering/      Canvas 2D rendering (board, pieces, particles, UIHelpers, TextFit)
   screens/        UI screens (home, game, menus, settings)
   state/          Global reactive state store
   themes/         Theme definitions and manager

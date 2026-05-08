@@ -78,6 +78,35 @@ function setupDevScreenshot(win) {
 app.whenReady().then(() => {
   const win = createWindow();
   setupDevScreenshot(win);
+
+  // Auto-screenshot mode: create .screenshot-all-trigger to capture all screens
+  const allTrigger = path.join(__dirname, '.screenshot-all-trigger');
+  const screenshotsDir = path.join(__dirname, 'assets', 'screenshots');
+  setInterval(() => {
+    if (fs.existsSync(allTrigger)) {
+      try { fs.unlinkSync(allTrigger); } catch (_) {}
+      if (!win || win.isDestroyed()) return;
+      const screens = [
+        { name: 'home_screen', switch: null, delay: 2000 },
+        { name: 'settings', switch: "switchScreen('settings')", delay: 1500 },
+        { name: 'stats', switch: "switchScreen('stats')", delay: 1500 },
+        { name: 'bot_select', switch: "switchScreen('botSelect')", delay: 1500 },
+        { name: 'custom_game', switch: "switchScreen('customGame')", delay: 1500 },
+        { name: 'how_to_play', switch: "switchScreen('howToPlay')", delay: 1500 },
+        { name: 'home_screen_final', switch: "switchScreen('home')", delay: 1500 },
+      ];
+      (async () => {
+        for (const s of screens) {
+          if (s.switch) await win.webContents.executeJavaScript(s.switch);
+          await new Promise(r => setTimeout(r, s.delay));
+          const img = await win.webContents.capturePage();
+          if (!fs.existsSync(screenshotsDir)) fs.mkdirSync(screenshotsDir, { recursive: true });
+          fs.writeFileSync(path.join(screenshotsDir, s.name + '.png'), img.toPNG());
+        }
+        fs.writeFileSync(path.join(__dirname, '.screenshots-done'), 'done');
+      })();
+    }
+  }, 500);
 });
 
 app.on('activate', () => {
