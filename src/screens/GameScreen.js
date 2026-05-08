@@ -88,6 +88,9 @@ const GameScreen = {
     });
 
     audioManager.init();
+    if (typeof audioManager.setSuspense === 'function') {
+      audioManager.setSuspense(false);
+    }
     audioManager.startMusic();
 
     // Initialize Pixi rendering
@@ -105,6 +108,9 @@ const GameScreen = {
 
   destroy() {
     audioManager.stopMusic();
+    if (typeof audioManager.setSuspense === 'function') {
+      audioManager.setSuspense(false);
+    }
     if (typeof PixiGameScreen !== 'undefined') {
       PixiGameScreen.destroy();
     }
@@ -186,6 +192,9 @@ const GameScreen = {
   render(ctx, dt) {
     const theme = ThemeManager.getTheme(store.get('theme'));
     const cols = theme.colors;
+    if (typeof audioManager !== 'undefined' && typeof audioManager.setSuspense === 'function') {
+      audioManager.setSuspense(this.gameStatus === 'check' && !this.gameOver);
+    }
 
     UIHelpers.drawDitheredRect(ctx, 0, 0, 1280, 3, cols.accent, '33');
 
@@ -884,7 +893,7 @@ const GameScreen = {
       audioManager.playCapture();
       audioManager.playScreenShake();
     } else {
-      audioManager.playMove();
+      audioManager.playMove(piece ? piece.type : null);
       const theme = ThemeManager.getTheme(store.get('theme'));
       const sqSize = 80;
       const offsetX = 320;
@@ -971,6 +980,9 @@ const GameScreen = {
 
     if (this.gameStatus === 'check') {
       audioManager.playCheck();
+    }
+    if (typeof audioManager.setSuspense === 'function') {
+      audioManager.setSuspense(this.gameStatus === 'check' && !this.gameOver);
     }
 
     store.update({
@@ -1109,6 +1121,9 @@ const GameScreen = {
 
 
   handleGameOverAction(action) {
+    if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
+      audioManager.playButton();
+    }
     switch (action) {
       case 'rematch':
         this.init();

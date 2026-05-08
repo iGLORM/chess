@@ -130,12 +130,14 @@ const PauseMenu = {
     // Confirm surrender dialog
     if (this.confirmSurrender) {
       if (x >= 460 && x <= 600 && y >= 420 && y <= 460) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
         this.confirmSurrender = false;
         this.hide();
         GameScreen.surrender();
         return;
       }
       if (x >= 680 && x <= 820 && y >= 420 && y <= 460) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
         this.confirmSurrender = false;
         return;
       }
@@ -150,6 +152,7 @@ const PauseMenu = {
     ];
     for (const btn of buttons) {
       if (x >= 540 && x <= 740 && y >= btn.y && y <= btn.y + 45) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
         if (btn.action === 'resume') this.hide();
         else if (btn.action === 'settings') { this.hide(); switchScreen('settings'); }
         else if (btn.action === 'surrender') { this.confirmSurrender = true; }

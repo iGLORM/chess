@@ -43,7 +43,13 @@ class ThemeManager {
     TextureManager.preloadTheme(theme.id);
     if (typeof audioManager !== 'undefined') {
       audioManager.stopMusic();
+      if (typeof audioManager.setSuspense === 'function') {
+        audioManager.setSuspense(false);
+      }
       audioManager.startMusic();
+      if (typeof audioManager.playThemeStinger === 'function') {
+        audioManager.playThemeStinger(theme.id);
+      }
     }
     store.saveProgress();
     return theme;

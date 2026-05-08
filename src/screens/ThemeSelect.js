@@ -164,6 +164,9 @@ const ThemeSelect = {
       group.cursor = 'pointer';
       group.hitArea = new PIXI.Rectangle(0, 0, 42, 56);
       group.on('pointertap', () => {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
+          audioManager.playButton();
+        }
         const current = custom.colors[key];
         const index = Math.max(0, presets.indexOf(current));
         ThemeManager.setCustomColor(key, presets[(index + 1) % presets.length]);
@@ -192,6 +195,9 @@ const ThemeSelect = {
       if (typeof audioManager !== 'undefined') {
         audioManager.stopMusic();
         audioManager.startMusic();
+        if (typeof audioManager.playThemeStinger === 'function') {
+          audioManager.playThemeStinger(id);
+        }
       }
       this.build();
     });
@@ -223,7 +229,9 @@ const ThemeSelect = {
 
   selectTheme(id, unlocked) {
     this.selectedThemeId = id;
-    if (unlocked) ThemeManager.applyTheme(id);
+    if (unlocked) {
+      ThemeManager.applyTheme(id);
+    }
     this.build();
   },
 

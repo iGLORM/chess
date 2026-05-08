@@ -202,7 +202,12 @@ const PixiPremiumScene = {
     if (!options.disabled && options.interactive !== false) {
       group.on('pointerover', () => draw(true));
       group.on('pointerout', () => draw(false));
-      group.on('pointertap', () => options.onClick && options.onClick());
+      group.on('pointertap', () => {
+        if (options.onClick && typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
+          audioManager.playButton();
+        }
+        if (options.onClick) options.onClick();
+      });
     }
     return group;
   },

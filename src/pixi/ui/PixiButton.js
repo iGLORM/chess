@@ -66,6 +66,9 @@ class PixiButton extends PIXI.Container {
     this.on('pointerup', () => {
       if (this.config.disabled) return;
       if (this._isPressed && this._clickHandler) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
+          audioManager.playButton();
+        }
         this._clickHandler();
       }
       this._isPressed = false;

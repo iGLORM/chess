@@ -98,6 +98,7 @@ const ModeSelect = {
   handleClick(x, y) {
     // Back button
     if (x >= 30 && x <= 180 && y >= 740 && y <= 780) {
+      if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
       switchScreen('home');
       return;
     }
@@ -107,6 +108,7 @@ const ModeSelect = {
       const btn = this.buttons[i];
       if (btn._bounds && x >= btn._bounds.x && x <= btn._bounds.x + btn._bounds.w &&
           y >= btn._bounds.y && y <= btn._bounds.y + btn._bounds.h) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
         this.startGame(btn.action);
         return;
       }

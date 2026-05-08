@@ -553,6 +553,9 @@ const HomeScreen = {
   },
 
   handleAction(action) {
+    if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
+      audioManager.playButton();
+    }
     switch (action) {
       case 'story':  store.set('mode', 'story'); switchScreen('characterSelect'); break;
       case '1v1':    store.set('mode', '1v1'); store.set('miniGamesEnabled', true); switchScreen('game', { mode: '1v1' }); break;

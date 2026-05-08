@@ -198,12 +198,14 @@ const BotSelect = {
 
   handleClick(x, y) {
     if (x >= 30 && x <= 190 && y >= 730 && y <= 770) {
+      if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
       switchScreen('home');
       return;
     }
 
     // Start button
     if (x >= 1280 - 220 && x <= 1280 - 30 && y >= 710 && y <= 760) {
+      if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
       store.set('classicElo', this.eloValue);
       store.set('classicDifficulty', this.eloToDifficulty(this.eloValue));
       store.set('mode', 'classic');
@@ -218,10 +220,12 @@ const BotSelect = {
     const btnH = 40;
     const btnGap = 20;
     if (x >= 640 - btnW - btnGap / 2 && x <= 640 - btnGap / 2 && y >= 485 && y <= 485 + btnH) {
+      if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
       store.set('p1IsWhite', true);
       return;
     }
     if (x >= 640 + btnGap / 2 && x <= 640 + btnGap / 2 + btnW && y >= 485 && y <= 485 + btnH) {
+      if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
       store.set('p1IsWhite', false);
       return;
     }

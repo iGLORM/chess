@@ -8,6 +8,7 @@ class AudioManager {
     this.currentLoop = null;
     this.nextLoopTime = 0;
     this.bpm = 100;
+    this.suspenseActive = false;
   }
 
   init() {
@@ -42,7 +43,11 @@ class AudioManager {
   }
 
   _playNote(freq, duration, type, volume, when, isMusic) {
+    if (!this.initialized) this.init();
     if (!this.enabled || !this.ctx) return;
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
     const t = (when || this.ctx.currentTime) + (isMusic ? (Math.random() - 0.5) * 0.02 : 0);
     const vol = (volume || 0.15) * (isMusic ? 0.85 + Math.random() * 0.3 : 1);
     const osc = this.ctx.createOscillator();
@@ -66,11 +71,6 @@ class AudioManager {
     freqs.forEach(f => this._playNote(f, duration, 'triangle', volume, when, true));
   }
 
-  // --- Pentatonic melody composition ---
-  // C major pentatonic: C, D, E, G, A (261.63, 293.66, 329.63, 392.00, 440.00)
-  // A minor pentatonic: A, C, D, E, G (220.00, 261.63, 293.66, 329.63, 392.00)
-  // F major pentatonic: F, G, A, C, D (349.23, 392.00, 440.00, 523.25, 587.33)
-
   startMusic() {
     if (!this.enabled || !this.ctx || this.musicPlaying) return;
     this._createMusicGain();
@@ -93,6 +93,17 @@ class AudioManager {
     }
   }
 
+  setSuspense(active) {
+    const next = !!active;
+    if (this.suspenseActive === next) return;
+    this.suspenseActive = next;
+
+    if (this.musicPlaying) {
+      this.stopMusic();
+      this.startMusic();
+    }
+  }
+
   _getMusicThemeId() {
     const themeId = store.get('theme');
     if (themeId === 'custom') {
@@ -104,17 +115,21 @@ class AudioManager {
   _scheduleLoop() {
     if (!this.musicPlaying) return;
     const themeId = this._getMusicThemeId();
-    const bpm = this._getThemeBPM(themeId);
+    const bpm = this.suspenseActive ? 116 : this._getThemeBPM(themeId);
     const beat = 60 / bpm;
     const now = this.ctx.currentTime;
 
     // Schedule 4 bars ahead, alternating A/B sections every ~2 minutes (40 bars)
     while (this.nextLoopTime < now + 4 * beat * 4) {
-      const section = Math.floor(this.barCount / 40) % 2 === 0 ? 'A' : 'B';
-      if (section === 'A') {
-        this._playBar(this.nextLoopTime, beat, this.barCount);
+      if (this.suspenseActive) {
+        this._playSuspenseBar(this.nextLoopTime, beat, this.barCount, themeId);
       } else {
-        this._playBarB(this.nextLoopTime, beat, this.barCount);
+        const section = Math.floor(this.barCount / 40) % 2 === 0 ? 'A' : 'B';
+        if (section === 'A') {
+          this._playBar(this.nextLoopTime, beat, this.barCount);
+        } else {
+          this._playBarB(this.nextLoopTime, beat, this.barCount);
+        }
       }
       this.barCount++;
       this.nextLoopTime += beat * 4;
@@ -172,6 +187,44 @@ class AudioManager {
       case 'prehistoric': this._playPrehistoricBarB(startTime, beat); break;
       case 'steampunk': this._playSteampunkBarB(startTime, beat); break;
       default: this._playSpaceBarB(startTime, beat); break;
+    }
+  }
+
+  _getThemeAudioProfile(themeId) {
+    const profiles = {
+      space: { root: 110, click: [880, 1320], move: 392, wave: 'sine' },
+      medieval: { root: 147, click: [392, 523], move: 294, wave: 'triangle' },
+      ocean: { root: 131, click: [659, 988], move: 330, wave: 'sine' },
+      egypt: { root: 131, click: [740, 554], move: 330, wave: 'triangle' },
+      cyberpunk: { root: 82, click: [980, 1470], move: 440, wave: 'sawtooth' },
+      japanese: { root: 110, click: [784, 1046], move: 392, wave: 'triangle' },
+      artdeco: { root: 123, click: [659, 880], move: 349, wave: 'triangle' },
+      wildwest: { root: 98, click: [330, 440], move: 247, wave: 'square' },
+      prehistoric: { root: 73, click: [180, 240], move: 196, wave: 'sawtooth' },
+      steampunk: { root: 98, click: [520, 900], move: 330, wave: 'square' },
+      crystal: { root: 165, click: [1046, 1568], move: 523, wave: 'sine' },
+    };
+    return profiles[themeId] || profiles.space;
+  }
+
+  _playSuspenseBar(startTime, beat, barNum, themeId) {
+    const profile = this._getThemeAudioProfile(themeId);
+    const root = profile.root;
+    const bass = [root, root * 1.06, root * 0.94, root * 1.06];
+    bass.forEach((f, i) => {
+      this._playNote(f, beat * 0.45, 'sawtooth', 0.06, startTime + i * beat, true);
+      this._playNote(f / 2, beat * 0.9, 'sine', 0.035, startTime + i * beat, true);
+    });
+
+    for (let i = 0; i < 8; i++) {
+      const tick = i % 2 === 0 ? profile.click[0] : profile.click[1];
+      this._playNote(tick, 0.025, 'square', 0.025, startTime + i * beat * 0.5, true);
+    }
+
+    if (barNum % 2 === 1) {
+      [root * 4, root * 4.5, root * 5.25, root * 6].forEach((f, i) => {
+        this._playNote(f, beat * 0.35, profile.wave, 0.035, startTime + beat * (2 + i * 0.35), true);
+      });
     }
   }
 
@@ -512,9 +565,27 @@ class AudioManager {
   }
 
   // --- Sound Effects ---
-  playMove() {
-    this._playNote(329.63, 0.08, 'triangle', 0.06);
-    setTimeout(() => this._playNote(392.00, 0.06, 'triangle', 0.04), 50);
+  playButton() {
+    const profile = this._getThemeAudioProfile(this._getMusicThemeId());
+    this._playNote(profile.click[0], 0.035, profile.wave, 0.045);
+    setTimeout(() => this._playNote(profile.click[1], 0.045, 'triangle', 0.035), 35);
+  }
+
+  playMove(pieceType) {
+    const profile = this._getThemeAudioProfile(this._getMusicThemeId());
+    const weights = {
+      pawn: 0.9,
+      knight: 1.05,
+      bishop: 1.05,
+      rook: 1.2,
+      queen: 1.35,
+      king: 1.5,
+    };
+    const weight = weights[pieceType] || 1;
+    const low = Math.max(70, profile.move / (1.75 + weight * 0.35));
+    this._playNote(low, 0.055 + weight * 0.012, 'sine', 0.045 + weight * 0.01);
+    setTimeout(() => this._playNote(profile.move * (0.9 + weight * 0.06), 0.07, profile.wave, 0.045), 45);
+    setTimeout(() => this._playNote(profile.move * 1.5, 0.035, 'triangle', 0.025), 95);
   }
 
   playSelect() {
@@ -590,6 +661,28 @@ class AudioManager {
     this._playNote(440, 0.1, 'triangle', 0.08);
     setTimeout(() => this._playNote(554, 0.1, 'triangle', 0.08), 100);
     setTimeout(() => this._playNote(659, 0.15, 'triangle', 0.1), 200);
+  }
+
+  playThemeStinger(themeId) {
+    const id = themeId || this._getMusicThemeId();
+    const profile = this._getThemeAudioProfile(id);
+    const stingers = {
+      space: [profile.root * 4, profile.root * 6, profile.root * 8],
+      medieval: [profile.root * 2, profile.root * 3, profile.root * 4],
+      ocean: [profile.root * 2, profile.root * 2.5, profile.root * 3, profile.root * 4],
+      egypt: [profile.root * 2.5, profile.root * 3, profile.root * 2.8, profile.root * 4],
+      cyberpunk: [profile.root * 4, profile.root * 8, profile.root * 6],
+      japanese: [profile.root * 3, profile.root * 4, profile.root * 6],
+      artdeco: [profile.root * 3, profile.root * 4.5, profile.root * 5.6],
+      wildwest: [profile.root * 2, profile.root * 3, profile.root * 4],
+      prehistoric: [profile.root, profile.root * 1.5, profile.root * 2],
+      steampunk: [profile.root * 2.5, profile.root * 4, profile.root * 5.5],
+      crystal: [profile.root * 4, profile.root * 6, profile.root * 9],
+    };
+    const notes = stingers[id] || stingers.space;
+    notes.forEach((f, i) => {
+      setTimeout(() => this._playNote(f, 0.12, profile.wave, 0.055), i * 95);
+    });
   }
 
   setEnabled(val) {
