@@ -123,12 +123,14 @@ const PixiGameHud = {
       });
     }
 
-    const charges = game.defensiveMiniGames?.[color] ?? 0;
-    this._text('DEFENSES: ' + charges, x + pad, y + 112, {
-      fontSize: 12,
-      fontWeight: '900',
-      fill: charges > 0 ? cols.accent : PixiColorUtil.alpha(cols.text, '44'),
-    });
+    if (game.gameplayMode) {
+      const charges = game.defensiveMiniGames?.[color] ?? 0;
+      this._text('DEFENSES: ' + charges, x + pad, y + 112, {
+        fontSize: 12,
+        fontWeight: '900',
+        fill: charges > 0 ? cols.accent : PixiColorUtil.alpha(cols.text, '44'),
+      });
+    }
 
     this._text('CAPTURED', x + pad, y + 136, {
       fontSize: 13,

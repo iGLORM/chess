@@ -146,12 +146,12 @@ class MiniGameManager {
 
   startMiniGame(attacker, defender, boardPos, isAIAttacking, callback) {
     const started = this.startDefensiveMiniGame({
-      attacker,
-      defender,
+      attacker: defender,
+      defender: attacker,
       boardPos,
       challengePlayerIsAI: isAIAttacking,
     }, (result) => {
-      if (callback) callback(result === 'defended' ? 'defender' : 'attacker');
+      if (callback) callback(result === 'defended' ? 'attacker' : 'defender');
     });
     if (!started && callback) callback('attacker');
     return started;
