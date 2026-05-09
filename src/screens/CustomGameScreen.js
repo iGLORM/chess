@@ -3,6 +3,7 @@ const CustomGameScreen = {
   pixiContainer: null,
   eloValue: 1000,
   playAs: 'white',
+  gameplayMode: true,
   minigameToggles: {},
 
   minigameList: [
@@ -27,6 +28,7 @@ const CustomGameScreen = {
     const stored = store.get('customElo');
     this.eloValue = stored || (200 + ((store.get('customDifficulty') || 5) - 1) * 200);
     this.playAs = store.get('customPlayAs') || 'white';
+    this.gameplayMode = store.get('customGameplayMode') !== false;
     this.minigameToggles = { ...(store.get('customMinigames') || {}) };
     for (const game of this.minigameList) {
       if (this.minigameToggles[game.key] === undefined) this.minigameToggles[game.key] = true;
@@ -61,7 +63,7 @@ const CustomGameScreen = {
 
   build() {
     if (this.pixiContainer) this.pixiContainer.destroy({ children: true });
-    this.pixiContainer = PixiPremiumScene.root('Custom Game', 'Tune the bot and capture challenges', { footerHint: `${this.eloValue} ELO | ${this.eloToName(this.eloValue)} | ${this.enabledCount()} minigames active` });
+    this.pixiContainer = PixiPremiumScene.root('Custom Game', 'Tune the bot and capture challenges', { footerHint: `${this.eloValue} ELO | ${this.eloToName(this.eloValue)} | ${this.enabledCount()} minigames active | ${this.gameplayMode ? 'Defensive' : 'Classic'} mode` });
     PixiScreenManager.setScreenContainer(this.pixiContainer);
 
     this.buildConfigPanel();
@@ -118,6 +120,11 @@ const CustomGameScreen = {
         this.build();
       }, { primary: this.playAs === color, fontSize: 16 });
     });
+
+    PixiPremiumScene.button(this.pixiContainer, 994, 236, 176, 36, this.gameplayMode ? 'Gameplay: ON' : 'Gameplay: OFF', () => {
+      this.gameplayMode = !this.gameplayMode;
+      this.build();
+    }, { primary: this.gameplayMode, fontSize: 14 });
   },
 
   buildMinigameGrid() {
@@ -180,6 +187,7 @@ const CustomGameScreen = {
     store.set('customElo', this.eloValue);
     store.set('customDifficulty', this.eloToDifficulty(this.eloValue));
     store.set('customPlayAs', this.playAs);
+    store.set('customGameplayMode', this.gameplayMode);
     store.set('customMinigames', { ...this.minigameToggles });
     store.set('mode', 'custom');
     store.set('p1IsWhite', this.playAs === 'white');
