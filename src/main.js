@@ -56,12 +56,10 @@ function _doSwitchScreen() {
 }
 
 function resizeCanvas() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  canvas.width = w;
-  canvas.height = h;
-  miniCanvas.width = w;
-  miniCanvas.height = h;
+  canvas.width = 1280;
+  canvas.height = 800;
+  miniCanvas.width = 1280;
+  miniCanvas.height = 800;
   // Don't touch pixiCanvas — PixiJS manages its own canvas buffer
 }
 

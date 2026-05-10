@@ -33,13 +33,8 @@
     tg.disableVerticalSwipes();
   }
 
-  // Ensure canvases fill the Telegram viewport after expansion
+  // Keep PixiJS at the fixed virtual resolution after Telegram viewport changes.
   tg.onEvent('viewportChanged', function () {
-    var canvases = document.querySelectorAll('canvas');
-    for (var i = 0; i < canvases.length; i++) {
-      canvases[i].style.width = window.innerWidth + 'px';
-      canvases[i].style.height = window.innerHeight + 'px';
-    }
     if (typeof PixiApp !== 'undefined' && PixiApp.app && PixiApp.app.renderer) {
       PixiApp.app.renderer.resize(1280, 800);
     }
@@ -98,20 +93,4 @@
       }
     }
   });
-
-  // Landscape orientation hint
-  var hint = document.getElementById('rotateHint');
-  if (hint) {
-    function checkOrientation() {
-      if (window.innerWidth < 768 && window.innerHeight > window.innerWidth) {
-        hint.style.display = 'flex';
-      } else {
-        hint.style.display = 'none';
-      }
-    }
-    hint.addEventListener('click', function () { hint.style.display = 'none'; });
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-    setTimeout(checkOrientation, 300);
-  }
 })();

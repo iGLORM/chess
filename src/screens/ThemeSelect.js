@@ -163,7 +163,7 @@ const ThemeSelect = {
       group.eventMode = 'static';
       group.cursor = 'pointer';
       group.hitArea = new PIXI.Rectangle(0, 0, 42, 56);
-      group.on('pointertap', () => {
+      group.on('pointerdown', () => {
         if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
           audioManager.playButton();
         }

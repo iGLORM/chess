@@ -180,6 +180,7 @@ const PixiPremiumScene = {
     if (options.interactive !== false) {
       group.eventMode = 'static';
       group.cursor = options.disabled ? 'default' : 'pointer';
+      group.hitArea = new PIXI.Rectangle(0, 0, w, h);
     }
     parent.addChild(group);
 
@@ -202,7 +203,7 @@ const PixiPremiumScene = {
     if (!options.disabled && options.interactive !== false) {
       group.on('pointerover', () => draw(true));
       group.on('pointerout', () => draw(false));
-      group.on('pointertap', () => {
+      group.on('pointerdown', () => {
         if (options.onClick && typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') {
           audioManager.playButton();
         }
