@@ -278,7 +278,11 @@ const GameScreen = {
     }
 
     if (this.gameOver) {
-      this.renderGameOverOverlay(ctx, cols);
+      if (typeof PixiGameOverOverlay !== 'undefined' && PixiGameOverOverlay.initialized) {
+        PixiGameOverOverlay.update(this);
+      } else {
+        this.renderGameOverOverlay(ctx, cols);
+      }
     }
 
     const canvas = document.getElementById('gameCanvas');
@@ -886,6 +890,7 @@ const GameScreen = {
       defender: captured,
       boardPos: move.to,
       challengePlayerIsAI,
+      botSkillLevel: this.characterLevel,
     }, (result) => {
       if (result === 'defended') {
         this.cancelCaptureAndPassTurn(move, piece, captured);
@@ -1233,6 +1238,9 @@ const GameScreen = {
   },
 
   handleGameEnd() {
+    if (typeof DialogueManager !== 'undefined') DialogueManager.destroy();
+    if (this._dialogueBubble) { this._dialogueBubble.dismiss(); this._dialogueBubble = null; }
+
     const stats = store.get('stats');
     stats.gamesPlayed++;
     if (this.gameResult === 'white') stats.wins++;

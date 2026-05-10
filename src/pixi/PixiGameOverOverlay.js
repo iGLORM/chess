@@ -135,8 +135,15 @@ const PixiGameOverOverlay = {
       });
       text.x = panelX + 43;
       text.y = panelY + 154;
+      const maxTextH = 80;
+      if (text.height > maxTextH) {
+        const mask = new PIXI.Graphics();
+        mask.rect(text.x, text.y, panelW - 86, maxTextH).fill(0xffffff);
+        c.addChild(mask);
+        text.mask = mask;
+      }
       c.addChild(text);
-      buttonY = panelY + Math.min(panelH - 92, 170 + text.height);
+      buttonY = panelY + 158 + Math.min(text.height, maxTextH) + 12;
     }
 
     const actions = [

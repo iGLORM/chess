@@ -97,6 +97,7 @@ class MiniGameManager {
     const defender = options.defender;
     const boardPos = options.boardPos || { row: 0, col: 0 };
     const challengePlayerIsAI = !!options.challengePlayerIsAI;
+    this.botSkillLevel = options.botSkillLevel || 5;
     const allowedGames = MiniGameManager.getAllowedGames(this.allGames);
     if (!attacker || !defender || allowedGames.length === 0) return false;
 
@@ -114,6 +115,7 @@ class MiniGameManager {
     this.challengeResult = null;
     this.botTimer = 0;
     this.nextBotAction = 0.3 + Math.random() * 0.3;
+    this._survivalTimer = 0;
 
     const totalWeight = allowedGames.reduce((s, g) => s + g.weight, 0);
     let r = Math.random() * totalWeight;
@@ -148,12 +150,13 @@ class MiniGameManager {
     return true;
   }
 
-  startMiniGame(attacker, defender, boardPos, isAIAttacking, callback) {
+  startMiniGame(attacker, defender, boardPos, isAIAttacking, callback, botSkillLevel) {
     const started = this.startDefensiveMiniGame({
       attacker: defender,
       defender: attacker,
       boardPos,
       challengePlayerIsAI: isAIAttacking,
+      botSkillLevel: botSkillLevel || 5,
     }, (result) => {
       if (callback) callback(result === 'defended' ? 'attacker' : 'defender');
     });
@@ -210,10 +213,13 @@ class MiniGameManager {
     // Bot AI plays the minigame when the challenge owner is AI-controlled.
     if ((this.challengePlayerIsAI || this.isAIAttacking) && !this.currentGame.done) {
       this.botTimer += dt;
-      // Human-like reaction delay: bot only acts every 0.15-0.4s
+      const lvl = this.botSkillLevel || 5;
+      const baseDelay = lvl <= 2 ? 0.8 : lvl <= 4 ? 0.5 : lvl <= 6 ? 0.3 : 0.15;
+      const variance = lvl <= 2 ? 0.6 : lvl <= 4 ? 0.4 : lvl <= 6 ? 0.2 : 0.15;
       if (!this.nextBotAction || this.botTimer >= this.nextBotAction) {
-        this.nextBotAction = this.botTimer + 0.15 + Math.random() * 0.25;
-        if (this.currentGame.botPlay) {
+        this.nextBotAction = this.botTimer + baseDelay + Math.random() * variance;
+        const missChance = lvl <= 1 ? 0.5 : lvl <= 3 ? 0.3 : lvl <= 5 ? 0.1 : 0;
+        if (this.currentGame.botPlay && Math.random() >= missChance) {
           this.currentGame.botPlay(dt, this.botTimer);
         }
       }
@@ -247,6 +253,32 @@ class MiniGameManager {
 
     const theme = ThemeManager.getTheme(store.get('theme'));
     const cols = theme.colors;
+
+    // When AI is the defender, show survival overlay instead of full minigame
+    if (this.challengePlayerIsAI && !this.currentGame.done) {
+      this._survivalTimer = (this._survivalTimer || 0) + 1 / 60;
+      ctx.fillStyle = 'rgba(0,0,0,0.60)';
+      ctx.fillRect(0, 0, Layout.W, Layout.H);
+      const bossName = (typeof GameScreen !== 'undefined' && GameScreen.currentCharacter && typeof GameScreen.currentCharacter === 'object')
+        ? GameScreen.currentCharacter.name : 'Opponent';
+      const blink = Math.sin(this._survivalTimer * 4) > 0 ? 1 : 0.4;
+      ctx.save();
+      ctx.globalAlpha = blink * globalAlpha;
+      ctx.fillStyle = cols.accent || '#ffcc00';
+      ctx.font = 'bold 32px "Pixelify Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(bossName + ' is trying to survive!', Layout.cx, Layout.cy - 20);
+      ctx.restore();
+      ctx.fillStyle = cols.text + 'aa';
+      ctx.font = '16px "Pixelify Sans", sans-serif';
+      ctx.textAlign = 'center';
+      const dots = '.'.repeat(Math.floor(this._survivalTimer * 2) % 4);
+      ctx.fillText('Playing minigame' + dots, Layout.cx, Layout.cy + 25);
+      ctx.restore();
+      this.animFrame = requestAnimationFrame(() => this.gameLoop());
+      return;
+    }
 
     // Background dim
     ctx.fillStyle = 'rgba(0,0,0,0.70)';
