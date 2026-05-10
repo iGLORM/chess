@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Chess 2.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +22,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overscroll-behavior: none;
+    }
+    canvas {
+      touch-action: none;
     }
     #gameCanvas, #pixiCanvas {
       display: block;
@@ -48,13 +52,35 @@
     #miniGameOverlay.active {
       display: block;
     }
+    #rotateHint {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(10,10,26,0.95);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: "Pixelify Sans", sans-serif;
+    }
+    #rotateHint .icon { font-size: 48px; transform: rotate(90deg); }
+    #rotateHint .msg { margin-top: 20px; font-size: 18px; }
+    #rotateHint .sub { margin-top: 10px; font-size: 14px; opacity: 0.6; }
   </style>
 </head>
 <body>
+  <div id="rotateHint">
+    <div class="icon">&#128241;</div>
+    <div class="msg">Rotate for the best experience</div>
+    <div class="sub">Tap to dismiss</div>
+  </div>
   <canvas id="pixiCanvas" width="1280" height="800"></canvas>
   <canvas id="gameCanvas" width="1280" height="800"></canvas>
   <canvas id="miniGameOverlay" width="1280" height="800"></canvas>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pixi.js@8/dist/pixi.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/PixiPlugin.min.js"></script>
@@ -81,7 +107,7 @@
   <script src="rendering/BoardRenderer.js"></script>
   <script src="rendering/UIHelpers.js"></script>
   <script type="module">
-    import { prepare, layout, prepareWithSegments, walkLineRanges, measureNaturalWidth } from '../node_modules/@chenglou/pretext/dist/layout.js';
+    import { prepare, layout, prepareWithSegments, walkLineRanges, measureNaturalWidth } from './vendor/pretext/layout.js';
     window.Pretext = { prepare, layout, prepareWithSegments, walkLineRanges, measureNaturalWidth };
   </script>
   <script src="rendering/TextFit.js"></script>
@@ -153,6 +179,7 @@
   <script src="pixi/PixiGameOverOverlay.js"></script>
   <script src="pixi/PixiScreenManager.js"></script>
 
+  <script src="telegram/telegram-compat.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

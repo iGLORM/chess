@@ -9,3 +9,5 @@ assets/generated/
 electron_err.log
 dev-screenshot.png
 .screenshot-trigger
+deploy.sh
+nginx-game.conf

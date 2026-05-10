@@ -168,6 +168,35 @@ assets/
 | `GameScreen.js` | Hybrid | Board via PixiJS, side panels/status bar via Canvas 2D |
 | All others | Canvas 2D | Not yet migrated |
 
+## Telegram Mini App
+
+The game runs as a **Telegram Mini App** at `https://game.altobolt.com` via bot `@iglorm_chess_bot`.
+
+### How It Works
+The **same `src/index.html`** serves both Electron and Telegram — no separate web version. Telegram-specific code auto-detects its environment:
+- `src/telegram/telegram-compat.js` — Telegram SDK init, back button, haptic feedback. All behind `if (window.Telegram)` guards — completely inert in Electron.
+- The Telegram Web App SDK (`telegram.org/js/telegram-web-app.js`) is loaded in `index.html` but is a no-op outside Telegram's webview.
+- `src/vendor/pretext/` — vendored copy of `@chenglou/pretext` dist so the ES module import works on both Electron (file paths) and web (HTTP paths).
+
+### Deployment
+The VPS is only accessible from the main dev PC (SSH alias `vps`). `deploy.sh` (local-only, gitignored) syncs files:
+```bash
+scp -r src assets vps:/var/www/chess2/
+ssh vps "sudo chmod -R o+rX /var/www/chess2/"
+```
+
+### Keeping In Sync
+Any change to `src/` or `assets/` automatically works on Telegram after redeploying. When adding new screens, scripts, or assets:
+1. Add `<script>` tags to `src/index.html` as usual — works for both Electron and web
+2. Redeploy to VPS after changes
+3. No separate files to maintain — the codebase is the deployment
+
+### Infrastructure
+- **Hosting**: nginx on VPS, root at `/var/www/chess2/src`, assets aliased from `/var/www/chess2/assets/`
+- **SSL**: Let's Encrypt (auto-renewing via certbot)
+- **Domain**: `game.altobolt.com` (A record → VPS IP)
+- **Bot**: `@iglorm_chess_bot` — menu button launches the Mini App
+
 ## Migration Status
 
 The game is migrating from Canvas 2D to PixiJS v8. Progress:

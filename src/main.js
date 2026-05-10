@@ -17,6 +17,7 @@ function registerScreen(name, screenImpl) {
 
 function switchScreen(name, data) {
   if (transition.active) return;
+  canvas.style.zIndex = '2';
   transition.active = true;
   transition.fadeOut = true;
   transition.alpha = 0;
@@ -46,7 +47,12 @@ function _doSwitchScreen() {
   if (isMenuScreen && typeof PixiMenuBackground !== 'undefined') {
     PixiMenuBackground.init();
   }
-  canvas.style.pointerEvents = (currentScreen && currentScreen.isPixiScreen) ? 'none' : 'auto';
+  if (currentScreen && currentScreen.isPixiScreen) {
+    canvas.style.pointerEvents = 'none';
+  } else {
+    canvas.style.pointerEvents = 'auto';
+    canvas.style.zIndex = '2';
+  }
 }
 
 function resizeCanvas() {
@@ -96,6 +102,9 @@ function gameLoop(timestamp) {
       if (transition.alpha <= 0) {
         transition.alpha = 0;
         transition.active = false;
+        if (currentScreen && currentScreen.isPixiScreen) {
+          canvas.style.zIndex = '0';
+        }
       }
     }
     ctx.fillStyle = `rgba(0,0,0,${transition.alpha})`;
@@ -189,6 +198,36 @@ function initApp() {
       currentScreen.handleWheel(e);
     }
   }, { passive: false });
+
+  // Touch events for mobile/tablet support
+  canvas.addEventListener('touchstart', (e) => {
+    if (transition.active) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const { x, y } = getMousePos(touch, canvas);
+    if (currentScreen && currentScreen.handleMouseDown) {
+      currentScreen.handleMouseDown(x, y);
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', (e) => {
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    if (currentScreen && currentScreen.handleMouseUp) {
+      currentScreen.handleMouseUp();
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchmove', (e) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const { x, y } = getMousePos(touch, canvas);
+    if (PauseMenu.visible && PauseMenu.handleMouseMove) {
+      PauseMenu.handleMouseMove(x, y);
+    } else if (currentScreen && currentScreen.handleMouseMove) {
+      currentScreen.handleMouseMove(x, y);
+    }
+  }, { passive: true });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'F11') {
