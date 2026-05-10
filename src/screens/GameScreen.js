@@ -348,12 +348,11 @@ const GameScreen = {
     const panelY = Layout.cy - 155;
     const btnRow1Y = panelY + 160;
     const buttons = [
-      { text: 'Play Again', action: 'rematch', x: cx - 250, y: btnRow1Y, w: 150, h: 42 },
-      { text: 'Main Menu', action: 'menu', x: cx - 75, y: btnRow1Y, w: 150, h: 42 },
-      { text: 'Themes', action: 'themes', x: cx + 100, y: btnRow1Y, w: 150, h: 42 },
+      { text: 'Play Again', action: 'rematch', x: cx - 214, y: btnRow1Y, w: 200, h: 56 },
+      { text: 'Main Menu', action: 'menu', x: cx + 14, y: btnRow1Y, w: 200, h: 56 },
     ];
     if (this.mode === 'story' && this.gameResult === 'white') {
-      buttons.push({ text: 'Next Level', action: 'next', x: cx - 75, y: btnRow1Y + 60, w: 150, h: 42 });
+      buttons.push({ text: 'Next Level', action: 'next', x: cx - 100, y: btnRow1Y + 70, w: 200, h: 56 });
     }
     return buttons;
   },
@@ -1279,9 +1278,6 @@ const GameScreen = {
         break;
       case 'menu':
         switchScreen('home');
-        break;
-      case 'themes':
-        switchScreen('themeSelect', { returnTo: 'game' });
         break;
       case 'next':
         if (this.mode === 'story' && this.currentCharacter) {

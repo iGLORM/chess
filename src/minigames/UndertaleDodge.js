@@ -303,11 +303,22 @@ class UndertaleDodge {
     ctx.ellipse(px - ps * 0.2, py, ps * 0.3, ps * 0.4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Controls hint
-    ctx.fillStyle = cols.text + '44';
-    ctx.font = '12px "Pixelify Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Arrow keys / WASD to dodge', x + w / 2, y + 320);
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = cols.text;
+      ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('◀', x + 30, y + h / 2 + 10);
+      ctx.fillText('▶', x + w - 30, y + h / 2 + 10);
+      ctx.fillText('▲', x + w / 2, y + 30);
+      ctx.fillText('▼', x + w / 2, y + h - 10);
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.fillStyle = cols.text + '44';
+      ctx.font = '12px "Pixelify Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Arrow keys / WASD to dodge', x + w / 2, y + 320);
+    }
 
     if (this.done) {
       const win = this.winner === 'attacker';
@@ -369,7 +380,22 @@ class UndertaleDodge {
     this.playerY = Math.max(arena.y + this.playerSize, Math.min(arena.y + arena.h - this.playerSize, this.playerY));
   }
 
-  handleClick(x, y) {}
+  handleClick(x, y) {
+    const rect = this._bounds || { x: 0, y: 0, w: 1, h: 1 };
+    const cx = rect.x + rect.w / 2;
+    const cy = rect.y + rect.h / 2;
+    const dx = x - cx;
+    const dy = y - cy;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      const key = dx < 0 ? 'ArrowLeft' : 'ArrowRight';
+      this.keys[key] = true;
+      setTimeout(() => this.keys[key] = false, 150);
+    } else {
+      const key = dy < 0 ? 'ArrowUp' : 'ArrowDown';
+      this.keys[key] = true;
+      setTimeout(() => this.keys[key] = false, 150);
+    }
+  }
 
   handleKey(key) {}
 

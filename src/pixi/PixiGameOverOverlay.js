@@ -147,21 +147,20 @@ const PixiGameOverOverlay = {
     }
 
     const actions = [
-      { text: 'Play Again', action: 'rematch', x: Layout.cx - 250, y: buttonY, width: 156 },
-      { text: 'Main Menu', action: 'menu', x: Layout.cx - 78, y: buttonY, width: 156 },
-      { text: 'Themes', action: 'themes', x: Layout.cx + 94, y: buttonY, width: 156 },
+      { text: 'Play Again', action: 'rematch', x: Layout.cx - 214, y: buttonY, width: 200 },
+      { text: 'Main Menu', action: 'menu', x: Layout.cx + 14, y: buttonY, width: 200 },
     ];
     if (game.mode === 'story' && game.gameResult === 'white') {
-      actions.push({ text: 'Next Level', action: 'next', x: Layout.cx - 88, y: buttonY + 58, width: 176 });
+      actions.push({ text: 'Next Level', action: 'next', x: Layout.cx - 100, y: buttonY + 70, width: 200 });
     }
 
     for (const item of actions) {
       const btn = new PixiButton({
         width: item.width,
-        height: 42,
+        height: 56,
         text: item.text,
         cols,
-        fontSize: 15,
+        fontSize: 18,
       });
       btn.x = item.x;
       btn.y = item.y;

@@ -370,8 +370,6 @@ const CharacterSelect = {
     });
 
     this.buildCharacterDetail();
-    const btnY = Layout.H - 82;
-    PixiPremiumScene.button(this.pixiContainer, Layout.W - 196, btnY, 160, 44, 'Themes', () => switchScreen('themeSelect', { returnTo: 'characterSelect' }), { icon: 'spark' });
   },
 
   buildCharacterDetail() {

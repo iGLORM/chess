@@ -359,6 +359,16 @@ class ShieldBlock {
       ctx.shadowBlur = 0;
     }
 
+    if (!this.done && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = cols.text;
+      ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('◀', x + 40, y + h / 2 + 10);
+      ctx.fillText('▶', x + w - 40, y + h / 2 + 10);
+      ctx.globalAlpha = 1;
+    }
+
     if (this.done) {
       const win = this.winner === 'attacker';
       ctx.fillStyle = win ? 'rgba(80, 220, 130, 0.30)' : 'rgba(220, 70, 80, 0.30)';
@@ -375,7 +385,17 @@ class ShieldBlock {
     ctx.restore();
   }
 
-  handleClick(x, y) {}
+  handleClick(x, y) {
+    const rect = this._bounds || { x: 0, y: 0, w: 1, h: 1 };
+    const cx = rect.x + rect.w / 2;
+    if (x < cx) {
+      this._keys['ArrowLeft'] = true;
+      setTimeout(() => this._keys['ArrowLeft'] = false, 150);
+    } else {
+      this._keys['ArrowRight'] = true;
+      setTimeout(() => this._keys['ArrowRight'] = false, 150);
+    }
+  }
 
   handleKey(key) {}
 }

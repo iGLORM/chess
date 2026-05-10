@@ -9,7 +9,48 @@ const ThemeSelect = {
     this.themes = ThemeManager.getAllThemes();
     this.returnScreen = data?.returnTo || 'home';
     this.selectedThemeId = store.get('theme') || 'space';
+    const settings = store.get('settings') || {};
+    if (settings.bossThemeEnabled !== false) {
+      this._buildLockedScreen();
+      return;
+    }
     this.build();
+  },
+
+  _buildLockedScreen() {
+    if (this.pixiContainer) this.pixiContainer.destroy({ children: true });
+    this.pixiContainer = PixiPremiumScene.root('Theme Select', 'Theme is controlled by boss world', {});
+    PixiScreenManager.setScreenContainer(this.pixiContainer);
+
+    const cols = ThemeManager.getCurrentColors();
+    const panelW = Layout.isPortrait ? 620 : 500;
+    const panelH = 220;
+    const px = Layout.cx - panelW / 2;
+    const py = Layout.cy - panelH / 2 - 40;
+    PixiPremiumScene.panel(this.pixiContainer, px, py, panelW, panelH, { accentAlpha: 0.5 });
+
+    const icon = new PIXI.Graphics();
+    icon.rect(0, 4, 40, 32).fill({ color: PixiColorUtil.hexToNum(cols.accent), alpha: 0.25 });
+    icon.rect(14, 0, 12, 8).fill({ color: PixiColorUtil.hexToNum(cols.accent), alpha: 0.6 });
+    icon.x = Layout.cx - 20;
+    icon.y = py + 28;
+    this.pixiContainer.addChild(icon);
+
+    const title = PixiPremiumScene.text('Boss World Theme Active', { fontSize: 24, fontWeight: '900', fill: cols.text });
+    title.anchor.set(0.5, 0);
+    title.x = Layout.cx;
+    title.y = py + 72;
+    this.pixiContainer.addChild(title);
+
+    const desc = PixiPremiumScene.text('The theme changes automatically based on the boss you fight.\nDisable "Boss World Theme" in Settings to pick themes manually.', { fontSize: 16, fill: PixiPremiumScene.alpha(cols.text, 'aa'), wordWrap: true, wordWrapWidth: panelW - 60, lineHeight: 22 });
+    desc.anchor.set(0.5, 0);
+    desc.x = Layout.cx;
+    desc.y = py + 108;
+    this.pixiContainer.addChild(desc);
+
+    const btnY = Layout.H - 82;
+    PixiPremiumScene.button(this.pixiContainer, 36, btnY, 160, 44, 'Back', () => switchScreen(this.returnScreen), { icon: 'back' });
+    PixiPremiumScene.button(this.pixiContainer, Layout.cx - 80, py + panelH - 58, 160, 44, 'Settings', () => switchScreen('settings'), { primary: true });
   },
 
   destroy() {
