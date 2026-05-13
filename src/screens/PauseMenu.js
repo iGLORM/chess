@@ -21,6 +21,7 @@ const PauseMenu = {
 
   render(ctx, dt) {
     if (!this.visible) return;
+    const s = Layout.uiScale || 1;
     const theme = ThemeManager.getTheme(store.get('theme'));
     const cols = theme.colors;
     const W = Layout.W;
@@ -43,40 +44,44 @@ const PauseMenu = {
 
     ctx.globalAlpha = this.fadeTimer;
 
-    // Confirm surrender dialog
     if (this.confirmSurrender) {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(0, 0, W, H);
 
-      const cDialogW = portrait ? 500 : 400;
-      const cDialogH = 180;
+      const cDialogW = Math.min(Math.round((portrait ? 500 : 400) * s), W - 40);
+      const cBtnW = Math.min(Math.round((portrait ? 180 : 140) * s), cDialogW - 60);
+      const cBtnH = Math.round((portrait ? 48 : 40) * s);
+      const cBtnGap = Math.round((portrait ? 40 : 20) * s);
+      const cTitleFs = Math.round(22 * s);
+      const cSubFs = Math.round(14 * s);
+      const cBtnFs = Math.round(13 * s);
+
+      const cTitleAreaH = Math.round(90 * s);
+      const cBtnAreaH = cBtnH + Math.round(30 * s);
+      const cDialogH = cTitleAreaH + cBtnAreaH;
       const cDialogX = cx - cDialogW / 2;
       const cDialogY = cy - cDialogH / 2;
 
       UIHelpers.drawPanel(ctx, cDialogX, cDialogY, cDialogW, cDialogH, cols);
-      UIHelpers.drawIcon(ctx, cx - 4, cDialogY + 25, 'skull', 10, cols, { color: '#ff4444' });
+      UIHelpers.drawIcon(ctx, cx - 4, cDialogY + Math.round(25 * s), 'skull', Math.round(10 * s), cols, { color: '#ff4444' });
 
       ctx.fillStyle = cols.text;
-      ctx.font = 'bold 22px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + cTitleFs + 'px "Pixelify Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Surrender?', cx, cDialogY + 50);
+      ctx.fillText('Surrender?', cx, cDialogY + Math.round(50 * s));
       ctx.fillStyle = cols.text + '88';
-      ctx.font = '14px "Pixelify Sans", sans-serif';
-      ctx.fillText('You will lose this game.', cx, cDialogY + 80);
+      ctx.font = cSubFs + 'px "Pixelify Sans", sans-serif';
+      ctx.fillText('You will lose this game.', cx, cDialogY + Math.round(80 * s));
 
-      const cBtnW = portrait ? 180 : 140;
-      const cBtnH = portrait ? 48 : 40;
-      const cBtnGap = portrait ? 40 : 20;
-      const cBtnY = cDialogY + 120;
+      const cBtnY = cDialogY + cTitleAreaH;
       const yesX = cx - cBtnW - cBtnGap / 2;
       const noX = cx + cBtnGap / 2;
 
       const isHoverYes = this.hoveredBtn === 'surrender-yes';
       const isHoverNo = this.hoveredBtn === 'surrender-no';
-      UIHelpers.drawButton(ctx, yesX, cBtnY, cBtnW, cBtnH, 'Yes', cols, { font: 'bold 13px "Pixelify Sans", sans-serif', hover: isHoverYes });
-      UIHelpers.drawButton(ctx, noX, cBtnY, cBtnW, cBtnH, 'Cancel', cols, { font: 'bold 13px "Pixelify Sans", sans-serif', hover: isHoverNo });
+      UIHelpers.drawButton(ctx, yesX, cBtnY, cBtnW, cBtnH, 'Yes', cols, { font: 'bold ' + cBtnFs + 'px "Pixelify Sans", sans-serif', hover: isHoverYes });
+      UIHelpers.drawButton(ctx, noX, cBtnY, cBtnW, cBtnH, 'Cancel', cols, { font: 'bold ' + cBtnFs + 'px "Pixelify Sans", sans-serif', hover: isHoverNo });
 
-      // Store confirm bounds for hit testing
       this._confirmYesBounds = { x: yesX, y: cBtnY, w: cBtnW, h: cBtnH };
       this._confirmNoBounds = { x: noX, y: cBtnY, w: cBtnW, h: cBtnH };
 
@@ -87,32 +92,37 @@ const PauseMenu = {
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.fillRect(0, 0, W, H);
 
-    const modalW = portrait ? 520 : 400;
-    const modalH = portrait ? 440 : 350;
+    const titleFs = Math.round(28 * s);
+    const btnFs = Math.round(16 * s);
+    const moveFs = Math.round(12 * s);
+    const btnW = Math.min(Math.round((portrait ? 280 : 200) * s), W - 40 - 40);
+    const btnH = Math.round((portrait ? 48 : 40) * s);
+    const btnGap = Math.round((portrait ? 18 : 10) * s);
+
+    const titleAreaH = Math.round(120 * s);
+    const modalW = Math.min(Math.round((portrait ? 520 : 400) * s), W - 40);
+    const modalH = titleAreaH + 4 * btnH + 3 * btnGap + Math.round(20 * s);
     const modalX = cx - modalW / 2;
     const modalY = cy - modalH / 2;
 
     UIHelpers.drawPanel(ctx, modalX, modalY, modalW, modalH, cols, { accentTop: true });
 
-    UIHelpers.drawIcon(ctx, cx - 4, modalY + 38, 'gear', 10, cols);
+    UIHelpers.drawIcon(ctx, cx - 4, modalY + Math.round(40 * s), 'gear', Math.round(12 * s), cols);
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + titleFs + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('PAUSED', cx, modalY + 70);
+    ctx.fillText('PAUSED', cx, modalY + Math.round(65 * s));
 
-    UIHelpers.drawSeparator(ctx, modalX + 30, modalY + 95, modalW - 60, cols);
+    UIHelpers.drawSeparator(ctx, modalX + 30, modalY + Math.round(82 * s), modalW - 60, cols);
 
     const moveCount = (typeof GameScreen !== 'undefined' && GameScreen.moveHistory) ? GameScreen.moveHistory.length : 0;
     ctx.fillStyle = cols.text + '55';
-    ctx.font = '12px "Pixelify Sans", sans-serif';
+    ctx.font = moveFs + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Move ' + moveCount, cx, modalY + 115);
+    ctx.fillText('Move ' + moveCount, cx, modalY + Math.round(102 * s));
 
-    const btnW = portrait ? 280 : 200;
-    const btnH = portrait ? 48 : 40;
-    const btnGap = portrait ? 14 : 10;
     const btnX = cx - btnW / 2;
-    const firstBtnY = modalY + 135;
+    const firstBtnY = modalY + titleAreaH;
 
     const buttons = [
       { text: 'Resume', action: 'resume', y: firstBtnY },
@@ -123,11 +133,10 @@ const PauseMenu = {
 
     for (const btn of buttons) {
       const isHover = this.hoveredBtn === btn.action;
-      UIHelpers.drawButton(ctx, btnX, btn.y, btnW, btnH, btn.text, cols, { font: 'bold 16px "Pixelify Sans", sans-serif', hover: isHover });
+      UIHelpers.drawButton(ctx, btnX, btn.y, btnW, btnH, btn.text, cols, { font: 'bold ' + btnFs + 'px "Pixelify Sans", sans-serif', hover: isHover });
       btn._bounds = { x: btnX, y: btn.y, w: btnW, h: btnH };
     }
 
-    // Store button layout for hit testing
     this._btnLayout = { x: btnX, w: btnW, h: btnH, gap: btnGap, firstY: firstBtnY };
 
     ctx.globalAlpha = 1;
@@ -166,7 +175,6 @@ const PauseMenu = {
   handleClick(x, y) {
     if (!this.visible || this.fadingOut) return 'ignore';
 
-    // Confirm surrender dialog
     if (this.confirmSurrender) {
       if (this._inBounds(x, y, this._confirmYesBounds)) {
         if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
