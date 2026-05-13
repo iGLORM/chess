@@ -82,7 +82,7 @@ const MiniGamePractice = {
       onClick: () => this.startGame(game.type),
       draw: (card) => {
         const thumb = new PIXI.Sprite(PixiPremiumAssets.minigame(game.key));
-        thumb.width = 180;
+        thumb.width = cardW - 28;
         thumb.height = 90;
         thumb.x = 14;
         thumb.y = 14;
@@ -91,14 +91,14 @@ const MiniGamePractice = {
         const title = PixiPremiumScene.text(game.name, { fontSize: 17, fontWeight: '900', fill: cols.text });
         title.x = 16;
         title.y = 112;
-        PixiPremiumScene.fit(title, 118, 0.54);
+        PixiPremiumScene.fit(title, cardW - 60, 0.54);
         card.addChild(title);
 
         const play = new PIXI.Sprite(PixiPremiumAssets.icon('play'));
-        play.width = 34;
-        play.height = 34;
-        play.x = 158;
-        play.y = 106;
+        play.width = 26;
+        play.height = 26;
+        play.x = cardW - 42;
+        play.y = 109;
         card.addChild(play);
 
         const desc = PixiPremiumScene.text(this.gameDescriptions[game.key] || 'Practice this challenge.', {
@@ -107,7 +107,7 @@ const MiniGamePractice = {
         });
         desc.x = 16;
         desc.y = 132;
-        PixiPremiumScene.fit(desc, 132, 0.45);
+        PixiPremiumScene.fit(desc, cardW - 32, 0.45);
         card.addChild(desc);
       },
     });

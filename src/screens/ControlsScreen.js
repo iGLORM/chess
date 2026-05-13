@@ -39,15 +39,15 @@ const ControlsScreen = {
       }, 620);
       this.presets();
     } else {
-      PixiPremiumScene.panel(this.pixiContainer, 150, 140, 980, 500, { accentAlpha: 0.45 });
-      this.section(204, 188, 'Dodge Sensitivity', 'Controls movement speed in falling-object and soul-dodge mini-games.', this.dodgeSensitivity, (value) => {
+      PixiPremiumScene.panel(this.pixiContainer, 220, 140, 840, 500, { accentAlpha: 0.45 });
+      this.section(274, 188, 'Dodge Sensitivity', 'Controls movement speed in falling-object and soul-dodge mini-games.', this.dodgeSensitivity, (value) => {
         this.dodgeSensitivity = value;
         this.saveSettings();
-      });
-      this.section(204, 346, 'Shield Sensitivity', 'Controls how quickly Shield Block responds to pointer movement.', this.shieldSensitivity, (value) => {
+      }, 600);
+      this.section(274, 370, 'Shield Sensitivity', 'Controls how quickly Shield Block responds to pointer movement.', this.shieldSensitivity, (value) => {
         this.shieldSensitivity = value;
         this.saveSettings();
-      });
+      }, 600);
       this.presets();
     }
 
@@ -87,6 +87,9 @@ const ControlsScreen = {
     });
     slider.x = x;
     slider.y = y + 88;
+    slider._valueText.anchor.set(0, 0.5);
+    slider._valueText.x = sw + 10;
+    slider._valueText.y = 10;
     slider.onChange(onChange);
     this.pixiContainer.addChild(slider);
   },
@@ -112,7 +115,7 @@ const ControlsScreen = {
       });
     } else {
       presets.forEach((preset, i) => {
-        PixiPremiumScene.button(this.pixiContainer, 248 + i * 252, 538, 214, 48, preset.label, () => {
+        PixiPremiumScene.button(this.pixiContainer, 300 + i * 232, 538, 214, 48, preset.label, () => {
           this.dodgeSensitivity = preset.dodge;
           this.shieldSensitivity = preset.shield;
           this.saveSettings();
