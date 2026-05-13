@@ -8,6 +8,7 @@ const HomeScreen = {
   _selectedIndex: 0,
 
   get LAYOUT() {
+    const s = Layout.uiScale || 1;
     if (Layout.isPortrait) {
       return {
         W: Layout.W, H: Layout.H,
@@ -15,15 +16,18 @@ const HomeScreen = {
         LOGO_MAX_W: 540,
         HERO_Y: 240,
         MAIN_START_Y: 440,
-        MAIN_BTN_W: 620,
-        HERO_BTN_H: 86,
-        MAIN_BTN_H: 72,
+        MAIN_BTN_W: Math.min(Math.round(620 * s), Layout.W - 40),
+        HERO_BTN_H: Math.round(86 * s),
+        MAIN_BTN_H: Math.round(72 * s),
         MAIN_BTN_GAP: 10,
         UTIL_Y: 850,
-        UTIL_BTN_W: 190,
-        UTIL_BTN_H: 42,
+        UTIL_BTN_W: Math.min(Math.round(190 * s), (Layout.W - 40 - 28) / 3),
+        UTIL_BTN_H: Math.round(42 * s),
         UTIL_GAP: 14,
         FOOTER_Y: 1240,
+        MAIN_FONT: Math.round(20 * s),
+        SUB_FONT: Math.round(14 * s),
+        UTIL_FONT: Math.round(13 * s),
       };
     }
     return {
@@ -32,15 +36,18 @@ const HomeScreen = {
       LOGO_MAX_W: 610,
       HERO_Y: 220,
       MAIN_START_Y: 388,
-      MAIN_BTN_W: 500,
-      HERO_BTN_H: 70,
-      MAIN_BTN_H: 58,
+      MAIN_BTN_W: Math.min(Math.round(500 * s), Layout.W - 40),
+      HERO_BTN_H: Math.round(70 * s),
+      MAIN_BTN_H: Math.round(58 * s),
       MAIN_BTN_GAP: 7,
       UTIL_Y: 690,
-      UTIL_BTN_W: 190,
-      UTIL_BTN_H: 33,
+      UTIL_BTN_W: Math.min(Math.round(190 * s), (Layout.W - 40 - 28) / 3),
+      UTIL_BTN_H: Math.round(33 * s),
       UTIL_GAP: 14,
       FOOTER_Y: 760,
+      MAIN_FONT: Math.round(20 * s),
+      SUB_FONT: Math.round(14 * s),
+      UTIL_FONT: Math.round(13 * s),
     };
   },
 

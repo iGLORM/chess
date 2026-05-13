@@ -18,6 +18,15 @@ const Layout = {
   get safeWidth() { return this.W - this.SAFE_X * 2; },
   get safeHeight() { return this.H - this.SAFE_TOP - this.SAFE_BOTTOM; },
 
+  get uiScale() {
+    const screenW = window.innerWidth || 800;
+    const screenH = window.innerHeight || 1280;
+    const shorter = Math.min(screenW, screenH);
+    if (shorter < 500) return 1.4;
+    if (shorter < 768) return 1.2;
+    return 1.0;
+  },
+
   _listeners: [],
   onChange(fn) { this._listeners.push(fn); },
   offChange(fn) { this._listeners = this._listeners.filter(f => f !== fn); },

@@ -77,13 +77,14 @@ const PixiPremiumScene = {
   header(root, title, subtitle, options = {}) {
     if (!title) return null;
     const cols = this.cols();
+    const scale = (typeof Layout !== 'undefined' && Layout.uiScale) || 1;
     const group = new PIXI.Container();
     group.label = 'premiumHeader';
     root.addChild(group);
 
     const titleText = this.text(title.toUpperCase(), {
       fontFamily: PixiTextStyles.FONT_TITLE,
-      fontSize: options.titleSize || 36,
+      fontSize: Math.round((options.titleSize || 36) * scale),
       fontWeight: 'bold',
       fill: cols.text,
       stroke: { color: 0x000000, width: 4 },
@@ -97,7 +98,7 @@ const PixiPremiumScene = {
 
     if (subtitle) {
       const sub = this.text(subtitle, {
-        fontSize: 18,
+        fontSize: Math.round(18 * scale),
         fontWeight: '700',
         fill: this.alpha(cols.text, 'aa'),
       });
@@ -119,6 +120,7 @@ const PixiPremiumScene = {
   },
 
   footer(root, cols, hint) {
+    const scale = (typeof Layout !== 'undefined' && Layout.uiScale) || 1;
     const footer = new PIXI.Container();
     footer.label = 'premiumFooter';
     root.addChild(footer);
@@ -130,7 +132,7 @@ const PixiPremiumScene = {
       .fill({ color: this.color(cols.accent), alpha: 0.22 });
     footer.addChild(line);
     if (hint) {
-      const text = this.text(hint, { fontSize: 14, fill: this.alpha(cols.text, '77') });
+      const text = this.text(hint, { fontSize: Math.round(14 * scale), fill: this.alpha(cols.text, '77') });
       text.anchor.set(0.5);
       text.x = this.W / 2;
       text.y = footerY + 18;
@@ -218,7 +220,10 @@ const PixiPremiumScene = {
 
   button(parent, x, y, w, h, label, onClick, options = {}) {
     const cols = this.cols();
-    const btn = this.card(parent, x, y, w, h, {
+    const scale = (typeof Layout !== 'undefined' && Layout.uiScale) || 1;
+    const scaledH = Math.round(h * scale);
+    const scaledFontSize = Math.round((options.fontSize || 18) * scale);
+    const btn = this.card(parent, x, y, w, scaledH, {
       active: options.primary,
       disabled: options.disabled,
       fill: options.fill || cols.buttonBg,
@@ -234,7 +239,7 @@ const PixiPremiumScene = {
           icon.height = 28;
         }
         const t = this.text(label, {
-          fontSize: options.fontSize || 18,
+          fontSize: scaledFontSize,
           fontWeight: '800',
           fill: options.disabled ? this.alpha(cols.text, '66') : cols.text,
         });
@@ -245,15 +250,15 @@ const PixiPremiumScene = {
           const totalW = icon.width + gap + t.width;
           const startX = Math.max(14, (w - totalW) / 2);
           icon.x = startX;
-          icon.y = (h - 28) / 2;
+          icon.y = (scaledH - 28) / 2;
           c.addChild(icon);
           t.anchor.set(0, 0.5);
           t.x = startX + 28 + gap;
-          t.y = h / 2 + 1;
+          t.y = scaledH / 2 + 1;
         } else {
           t.anchor.set(0.5);
           t.x = w / 2;
-          t.y = h / 2 + 1;
+          t.y = scaledH / 2 + 1;
         }
         c.addChild(t);
       },
