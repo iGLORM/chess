@@ -103,12 +103,20 @@ const StatsScreen = {
     const miniWins = stats.miniGamesWon || 0;
     const miniRate = miniGames ? Math.round((miniWins / miniGames) * 100) : 0;
 
-    const rowGap = Math.min(72, (h - 150) / 3);
-    const rowStart = y + Math.min(112, h * 0.28);
+    const gamesLabel = PixiPremiumScene.text('Games Played', { fontSize: 14, fontWeight: '700', fill: PixiPremiumScene.alpha(cols.text, '88') });
+    gamesLabel.x = x + 34;
+    gamesLabel.y = y + 72;
+    group.addChild(gamesLabel);
+    const gamesValue = PixiPremiumScene.text(String(games), { fontSize: 42, fontWeight: '900', fill: cols.accent });
+    gamesValue.x = x + 34;
+    gamesValue.y = y + 92;
+    group.addChild(gamesValue);
+
+    const rowGap = Math.min(72, (h - 150) / 2);
+    const rowStart = y + Math.min(170, h * 0.50);
     const rows = [
       ['Win Rate', `${winRate}%`],
       ['Mini-Game Rate', `${miniRate}%`],
-      ['Story Progress', `${storyLevel}/10`],
     ];
     rows.forEach((row, i) => {
       const yy = rowStart + i * rowGap;
@@ -122,9 +130,6 @@ const StatsScreen = {
       value.y = yy - 6;
       group.addChild(value);
     });
-
-    const barY = y + h - 44;
-    this.bar(group, x + 34, barY, w - 68, 16, Math.min(1, storyLevel / 10), cols);
     return group;
   },
 
@@ -151,10 +156,11 @@ const StatsScreen = {
         PixiPremiumScene.fit(label, 126, 0.65);
         card.addChild(label);
 
-        const value = PixiPremiumScene.text(String(item.value), {
+        const isZero = item.value === 0 || item.value === '0';
+        const value = PixiPremiumScene.text(isZero ? '—' : String(item.value), {
           fontSize: 25,
           fontWeight: '900',
-          fill: item.accent,
+          fill: isZero ? PixiPremiumScene.alpha(cols.text, '44') : item.accent,
         });
         value.anchor.set(1, 0);
         value.x = w - 22;
@@ -162,7 +168,7 @@ const StatsScreen = {
         PixiPremiumScene.fit(value, 66, 0.58);
         card.addChild(value);
 
-        if (item.ratio !== undefined) {
+        if (item.ratio !== undefined && item.ratio > 0) {
           this.bar(card, 74, 52, w - 100, 8, item.ratio, cols, item.accent);
         }
       },
