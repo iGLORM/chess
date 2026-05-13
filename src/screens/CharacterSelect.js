@@ -254,6 +254,15 @@ const CharacterSelect = {
     return themeId === 'custom' ? (store.get('customBgTheme') || 'space') : themeId;
   },
 
+  TIER_COLORS: {
+    rookie: '#44dd44',
+    beginner: '#44dddd',
+    intermediate: '#dddd44',
+    advanced: '#dd8844',
+    expert: '#dd4444',
+    madness: '#ff4868',
+  },
+
   buildDifficulty() {
     const tiers = ['rookie', 'beginner', 'intermediate', 'advanced', 'expert'];
     if (store.get('madnessUnlocked')) tiers.push('madness');
@@ -275,15 +284,21 @@ const CharacterSelect = {
     const startY = 190;
     tiers.forEach((tier, i) => {
       const config = DifficultyScaler.TIER_CONFIG[tier];
+      const tierColor = this.TIER_COLORS[tier] || ThemeManager.getCurrentColors().accent;
       PixiPremiumScene.card(this.pixiContainer, cardX, startY + i * 76, cardW, 60, {
-        activeColor: tier === 'madness' ? '#ff4868' : ThemeManager.getCurrentColors().accent,
+        activeColor: tierColor,
         onClick: () => this.chooseDifficulty(tier),
         draw: (card) => {
           const cols = ThemeManager.getCurrentColors();
+
+          const stripe = new PIXI.Graphics()
+            .roundRect(0, 0, 4, 60, 2).fill({ color: PixiPremiumScene.color(tierColor), alpha: 0.92 });
+          card.addChild(stripe);
+
           const label = PixiPremiumScene.text(config.label, {
             fontSize: 23,
             fontWeight: '800',
-            fill: tier === 'madness' ? '#ff8aa0' : cols.text,
+            fill: cols.text,
           });
           label.x = 28;
           label.y = 17;
@@ -296,7 +311,7 @@ const CharacterSelect = {
           PixiPremiumScene.fit(desc, 250);
           card.addChild(desc);
 
-          const elo = PixiPremiumScene.text(config.elo, { fontSize: 18, fontWeight: '800', fill: cols.accent });
+          const elo = PixiPremiumScene.text(config.elo, { fontSize: 18, fontWeight: '800', fill: tierColor });
           elo.anchor.set(1, 0.5);
           elo.x = cardW - 32;
           elo.y = 32;
@@ -346,25 +361,44 @@ const CharacterSelect = {
         },
         draw: (card) => {
           const cols = ThemeManager.getCurrentColors();
-          const thumb = new PIXI.Sprite(unlocked ? PixiPremiumAssets.character(ch.id) : PixiPremiumAssets.icon('lock'));
-          thumb.width = 52;
-          thumb.height = 52;
-          thumb.x = 12;
-          thumb.y = 11;
-          thumb.alpha = unlocked ? 1 : 0.75;
-          card.addChild(thumb);
+          if (!unlocked) card.alpha = 0.5;
 
-          const name = PixiPremiumScene.text(unlocked ? ch.name : `Level ${ch.level} Locked`, { fontSize: 18, fontWeight: '800', fill: unlocked ? cols.text : PixiPremiumScene.alpha(cols.text, '77') });
+          if (unlocked) {
+            const thumb = new PIXI.Sprite(PixiPremiumAssets.character(ch.id));
+            thumb.width = 52;
+            thumb.height = 52;
+            thumb.x = 12;
+            thumb.y = 11;
+            card.addChild(thumb);
+          } else {
+            const lock = new PIXI.Sprite(PixiPremiumAssets.icon('lock'));
+            lock.width = 28;
+            lock.height = 28;
+            lock.x = 24;
+            lock.y = 6;
+            lock.alpha = 0.6;
+            card.addChild(lock);
+          }
+
+          const name = PixiPremiumScene.text(ch.name, { fontSize: 18, fontWeight: '800', fill: unlocked ? cols.text : PixiPremiumScene.alpha(cols.text, '77') });
           name.x = 76;
-          name.y = 16;
+          name.y = unlocked ? 16 : 8;
           PixiPremiumScene.fit(name, cardW - 92);
           card.addChild(name);
 
-          const title = PixiPremiumScene.text(unlocked ? ch.title : `Beat level ${ch.level - 1}`, { fontSize: 12.5, fill: unlocked ? ch.colors.primary : PixiPremiumScene.alpha(cols.text, '55') });
+          const title = PixiPremiumScene.text(unlocked ? ch.title : `Win Level ${ch.level - 1} to unlock`, { fontSize: 12.5, fill: unlocked ? ch.colors.primary : PixiPremiumScene.alpha(cols.text, '55') });
           title.x = 76;
-          title.y = 42;
+          title.y = unlocked ? 42 : 30;
           PixiPremiumScene.fit(title, cardW - 94, 0.62);
           card.addChild(title);
+
+          if (!unlocked) {
+            const lvl = PixiPremiumScene.text(`Level ${ch.level}`, { fontSize: 11, fill: PixiPremiumScene.alpha(cols.text, '44') });
+            lvl.x = 76;
+            lvl.y = 52;
+            PixiPremiumScene.fit(lvl, cardW - 94, 0.62);
+            card.addChild(lvl);
+          }
         },
       });
     });
