@@ -57,33 +57,37 @@ const SettingsScreen = {
 
     const btnY = Layout.isPortrait ? Layout.H - Layout.SAFE_BOTTOM - 48 : 718;
     PixiPremiumScene.button(this.pixiContainer, 36, btnY, 160, 44, 'Back', () => switchScreen('home'), { icon: 'back' });
+    PixiPremiumScene.button(this.pixiContainer, Layout.W - 196, btnY, 160, 44, 'Themes', () => switchScreen('themeSelect', { returnTo: 'settings' }), { icon: 'spark' });
     if (this.feedbackOpen) this.buildFeedbackModal();
     if (this.confirmReset) this.buildResetModal();
   },
 
   buildAudioPanel() {
     const cols = ThemeManager.getCurrentColors();
+    const s = Layout.uiScale || 1;
     if (Layout.isPortrait) {
-      const panelX = (Layout.W - 720) / 2;
-      PixiPremiumScene.panel(this.pixiContainer, panelX, 132, 720, 330, { accentAlpha: 0.48 });
+      const panelW = Math.min(720, Layout.W - 80);
+      const panelX = (Layout.W - panelW) / 2;
+      PixiPremiumScene.panel(this.pixiContainer, panelX, 132, panelW, 330, { accentAlpha: 0.48 });
       this.sectionTitle(panelX + 32, 160, 'Audio Mix', 'Balanced sliders with no hidden hitboxes');
 
-      this.addSlider(panelX + 40, 236, 560, 'Music Volume', this.settings.musicVolume, (value) => {
+      const sliderW = panelW - 160;
+      this.addSlider(panelX + 40, 236, sliderW, 'Music Volume', this.settings.musicVolume, (value) => {
         this.settings.musicVolume = value;
         this.saveSettings();
       });
-      this.addSlider(panelX + 40, 326, 560, 'SFX Volume', this.settings.sfxVolume, (value) => {
+      this.addSlider(panelX + 40, 326, sliderW, 'SFX Volume', this.settings.sfxVolume, (value) => {
         this.settings.sfxVolume = value;
         this.saveSettings();
       });
 
-      const toggleLabel = PixiPremiumScene.text('Audio Enabled', { fontSize: 17, fontWeight: '800', fill: cols.text });
-      toggleLabel.x = panelX + 460;
+      const toggleLabel = PixiPremiumScene.text('Audio Enabled', { fontSize: Math.round(17 * s), fontWeight: '800', fill: cols.text });
+      toggleLabel.x = panelX + panelW - 260;
       toggleLabel.y = 158;
       PixiPremiumScene.fit(toggleLabel, 130, 0.62);
       this.pixiContainer.addChild(toggleLabel);
       const toggle = new PixiToggle({ width: 58, height: 24, value: this.settings.audioEnabled !== false, cols });
-      toggle.x = panelX + 620;
+      toggle.x = panelX + panelW - 100;
       toggle.y = 160;
       toggle.onChange((value) => {
         this.settings.audioEnabled = value;
@@ -91,23 +95,23 @@ const SettingsScreen = {
       });
       this.pixiContainer.addChild(toggle);
 
-      const bossLabel = PixiPremiumScene.text('Boss World Theme', { fontSize: 17, fontWeight: '800', fill: cols.text });
+      const bossLabel = PixiPremiumScene.text('Boss World Theme', { fontSize: Math.round(17 * s), fontWeight: '800', fill: cols.text });
       bossLabel.x = panelX + 40;
       bossLabel.y = 400;
       PixiPremiumScene.fit(bossLabel, 200, 0.62);
       this.pixiContainer.addChild(bossLabel);
       const bossToggle = new PixiToggle({ width: 58, height: 24, value: this.settings.bossThemeEnabled !== false, cols });
-      bossToggle.x = panelX + 620;
+      bossToggle.x = panelX + panelW - 100;
       bossToggle.y = 400;
       bossToggle.onChange((value) => {
         this.settings.bossThemeEnabled = value;
         this.saveSettings();
       });
       this.pixiContainer.addChild(bossToggle);
-      const bossHint = PixiPremiumScene.text('Auto-switch theme when fighting a boss', { fontSize: 14, fill: PixiPremiumScene.alpha(cols.text, '77') });
+      const bossHint = PixiPremiumScene.text('Auto-switch theme when fighting a boss', { fontSize: Math.round(14 * s), fill: PixiPremiumScene.alpha(cols.text, '77') });
       bossHint.x = panelX + 40;
       bossHint.y = 430;
-      PixiPremiumScene.fit(bossHint, 500, 0.55);
+      PixiPremiumScene.fit(bossHint, panelW - 120, 0.55);
       this.pixiContainer.addChild(bossHint);
     } else {
       PixiPremiumScene.panel(this.pixiContainer, 76, 132, 552, 330, { accentAlpha: 0.48 });
@@ -122,7 +126,7 @@ const SettingsScreen = {
         this.saveSettings();
       });
 
-      const toggleLabel = PixiPremiumScene.text('Audio Enabled', { fontSize: 17, fontWeight: '800', fill: cols.text });
+      const toggleLabel = PixiPremiumScene.text('Audio Enabled', { fontSize: Math.round(17 * s), fontWeight: '800', fill: cols.text });
       toggleLabel.x = 386;
       toggleLabel.y = 158;
       PixiPremiumScene.fit(toggleLabel, 130, 0.62);
@@ -136,7 +140,7 @@ const SettingsScreen = {
       });
       this.pixiContainer.addChild(toggle);
 
-      const bossLabel = PixiPremiumScene.text('Boss World Theme', { fontSize: 17, fontWeight: '800', fill: cols.text });
+      const bossLabel = PixiPremiumScene.text('Boss World Theme', { fontSize: Math.round(17 * s), fontWeight: '800', fill: cols.text });
       bossLabel.x = 116;
       bossLabel.y = 400;
       PixiPremiumScene.fit(bossLabel, 200, 0.62);
@@ -149,7 +153,7 @@ const SettingsScreen = {
         this.saveSettings();
       });
       this.pixiContainer.addChild(bossToggle);
-      const bossHint = PixiPremiumScene.text('Auto-switch theme when fighting a boss', { fontSize: 14, fill: PixiPremiumScene.alpha(cols.text, '77') });
+      const bossHint = PixiPremiumScene.text('Auto-switch theme when fighting a boss', { fontSize: Math.round(14 * s), fill: PixiPremiumScene.alpha(cols.text, '77') });
       bossHint.x = 116;
       bossHint.y = 430;
       PixiPremiumScene.fit(bossHint, 400, 0.55);
@@ -159,21 +163,23 @@ const SettingsScreen = {
 
   buildProfilePanel() {
     const cols = ThemeManager.getCurrentColors();
+    const s = Layout.uiScale || 1;
     if (Layout.isPortrait) {
-      const panelX = (Layout.W - 720) / 2;
+      const panelW = Math.min(720, Layout.W - 80);
+      const panelX = (Layout.W - panelW) / 2;
       const panelY = 492;
-      PixiPremiumScene.panel(this.pixiContainer, panelX, panelY, 720, 270, { accentAlpha: 0.48 });
+      PixiPremiumScene.panel(this.pixiContainer, panelX, panelY, panelW, 270, { accentAlpha: 0.48 });
       this.sectionTitle(panelX + 32, panelY + 28, 'Players', 'Readable names with inline editing');
-      this.nameRow(panelX + 40, panelY + 98, 'Player 1 Name', 'whitePlayer', store.get('whitePlayer') || 'Player 1', 640);
-      this.nameRow(panelX + 40, panelY + 178, 'Player 2 Name', 'blackPlayer', store.get('blackPlayer') || 'Player 2', 640);
+      this.nameRow(panelX + 40, panelY + 98, 'Player 1 Name', 'whitePlayer', store.get('whitePlayer') || 'Player 1', panelW - 80);
+      this.nameRow(panelX + 40, panelY + 178, 'Player 2 Name', 'blackPlayer', store.get('blackPlayer') || 'Player 2', panelW - 80);
 
       const note = PixiPremiumScene.text('Names are UI-only and do not change save compatibility.', {
-        fontSize: 15,
+        fontSize: Math.round(15 * s),
         fill: PixiPremiumScene.alpha(cols.text, '77'),
       });
       note.x = panelX + 44;
       note.y = panelY + 234;
-      PixiPremiumScene.fit(note, 620);
+      PixiPremiumScene.fit(note, panelW - 100);
       this.pixiContainer.addChild(note);
     } else {
       PixiPremiumScene.panel(this.pixiContainer, 660, 132, 544, 330, { accentAlpha: 0.48 });
@@ -182,7 +188,7 @@ const SettingsScreen = {
       this.nameRow(700, 310, 'Player 2 Name', 'blackPlayer', store.get('blackPlayer') || 'Player 2');
 
       const note = PixiPremiumScene.text('Names are UI-only and do not change save compatibility.', {
-        fontSize: 15,
+        fontSize: Math.round(15 * s),
         fill: PixiPremiumScene.alpha(cols.text, '77'),
       });
       note.x = 704;
@@ -193,49 +199,43 @@ const SettingsScreen = {
   },
 
   buildActionPanel() {
+    const s = Layout.uiScale || 1;
     if (Layout.isPortrait) {
-      const panelX = (Layout.W - 720) / 2;
+      const panelW = Math.min(720, Layout.W - 80);
+      const panelX = (Layout.W - panelW) / 2;
       const panelY = 792;
-      const cardW = 660;
+      const cardW = panelW - 60;
       const cardH = 82;
       const cardGap = 14;
-      const panelH = 80 + (cardH + cardGap) * 5;
-      PixiPremiumScene.panel(this.pixiContainer, panelX, panelY, 720, panelH, { accentAlpha: 0.42 });
+      const panelH = 80 + (cardH + cardGap) * 4;
+      PixiPremiumScene.panel(this.pixiContainer, panelX, panelY, panelW, panelH, { accentAlpha: 0.42 });
       this.sectionTitle(panelX + 32, panelY + 28, 'Game Tools', 'Practice, controls, and save maintenance');
       const actions = [
         { label: 'Practice Mini-Games', sub: 'Try every capture challenge', icon: 'play', action: () => switchScreen('miniGamePractice') },
         { label: 'Controls', sub: 'Tune mini-game sensitivity', icon: 'settings', action: () => switchScreen('controls') },
-        { label: 'Themes', sub: 'Pick a color scheme', icon: 'spark', action: () => switchScreen('themeSelect', { returnTo: 'settings' }) },
         { label: 'Send Feedback', sub: 'Suggest a feature or report a problem', icon: 'spark', action: () => { this.feedbackOpen = true; this.feedbackCategory = 'feature'; this.feedbackSending = false; this.feedbackDone = false; this.build(); this._createTextarea(); } },
-        { label: 'Reset Progress', sub: 'Clear story slots and stats', icon: 'lock', danger: true, action: () => { this.confirmReset = true; this.build(); } },
+        { label: 'Reset Progress', sub: 'Clear story slots and stats', icon: 'lock', action: () => { this.confirmReset = true; this.build(); } },
       ];
       actions.forEach((action, i) => {
         const cardX = panelX + 30;
         const cardY = panelY + 80 + i * (cardH + cardGap);
         PixiPremiumScene.card(this.pixiContainer, cardX, cardY, cardW, cardH, {
           onClick: action.action,
-          activeColor: action.danger ? '#ff6578' : ThemeManager.getCurrentColors().accent,
+          activeColor: action.label === 'Reset Progress' ? '#ff6578' : ThemeManager.getCurrentColors().accent,
           draw: (card) => {
             const cols = ThemeManager.getCurrentColors();
-            if (action.danger) {
-              const dangerBg = new PIXI.Graphics();
-              dangerBg.roundRect(2, 2, cardW - 4, cardH - 4, 6).fill({ color: PixiColorUtil.hexToNum('#ff6578'), alpha: 0.1 });
-              dangerBg.rect(0, 0, 3, cardH).fill({ color: PixiColorUtil.hexToNum('#ff6578'), alpha: 0.7 });
-              card.addChild(dangerBg);
-            }
             const icon = new PIXI.Sprite(PixiPremiumAssets.icon(action.icon));
             icon.width = 52;
             icon.height = 52;
             icon.x = 18;
             icon.y = 14;
-            if (action.danger) icon.tint = PixiColorUtil.hexToNum('#ff6578');
             card.addChild(icon);
-            const label = PixiPremiumScene.text(action.label, { fontSize: 20, fontWeight: '900', fill: action.danger ? '#ff6578' : cols.text });
+            const label = PixiPremiumScene.text(action.label, { fontSize: Math.round(20 * s), fontWeight: '900', fill: cols.text });
             label.x = 84;
             label.y = 16;
             PixiPremiumScene.fit(label, cardW - 120);
             card.addChild(label);
-            const sub = PixiPremiumScene.text(action.sub, { fontSize: 14, fill: PixiPremiumScene.alpha(action.danger ? '#ff6578' : cols.text, '88') });
+            const sub = PixiPremiumScene.text(action.sub, { fontSize: Math.round(14 * s), fill: PixiPremiumScene.alpha(cols.text, '88') });
             sub.x = 84;
             sub.y = 46;
             PixiPremiumScene.fit(sub, cardW - 120, 0.55);
@@ -246,42 +246,33 @@ const SettingsScreen = {
     } else {
       PixiPremiumScene.panel(this.pixiContainer, 76, 492, 1128, 230, { accentAlpha: 0.42 });
       this.sectionTitle(108, 520, 'Game Tools', 'Practice, controls, and save maintenance');
-      const lCardW = 200;
       const actions = [
-        { x: 96, label: 'Practice Mini-Games', sub: 'Capture challenges', icon: 'play', action: () => switchScreen('miniGamePractice') },
-        { x: 308, label: 'Controls', sub: 'Mini-game sensitivity', icon: 'settings', action: () => switchScreen('controls') },
-        { x: 520, label: 'Themes', sub: 'Pick a color scheme', icon: 'spark', action: () => switchScreen('themeSelect', { returnTo: 'settings' }) },
-        { x: 732, label: 'Send Feedback', sub: 'Suggest or report', icon: 'spark', action: () => { this.feedbackOpen = true; this.feedbackCategory = 'feature'; this.feedbackSending = false; this.feedbackDone = false; this.build(); this._createTextarea(); } },
-        { x: 944, label: 'Reset Progress', sub: 'Clear slots and stats', icon: 'lock', danger: true, action: () => { this.confirmReset = true; this.build(); } },
+        { x: 120, label: 'Practice Mini-Games', sub: 'Try every capture challenge', icon: 'play', action: () => switchScreen('miniGamePractice') },
+        { x: 380, label: 'Controls', sub: 'Tune mini-game sensitivity', icon: 'settings', action: () => switchScreen('controls') },
+        { x: 640, label: 'Send Feedback', sub: 'Suggest or report', icon: 'spark', action: () => { this.feedbackOpen = true; this.feedbackCategory = 'feature'; this.feedbackSending = false; this.feedbackDone = false; this.build(); this._createTextarea(); } },
+        { x: 900, label: 'Reset Progress', sub: 'Clear story slots and stats', icon: 'lock', action: () => { this.confirmReset = true; this.build(); } },
       ];
       actions.forEach(action => {
-        PixiPremiumScene.card(this.pixiContainer, action.x, 582, lCardW, 92, {
+        PixiPremiumScene.card(this.pixiContainer, action.x, 582, 244, 92, {
           onClick: action.action,
-          activeColor: action.danger ? '#ff6578' : ThemeManager.getCurrentColors().accent,
+          activeColor: action.label === 'Reset Progress' ? '#ff6578' : ThemeManager.getCurrentColors().accent,
           draw: (card) => {
             const cols = ThemeManager.getCurrentColors();
-            if (action.danger) {
-              const dangerBg = new PIXI.Graphics();
-              dangerBg.roundRect(2, 2, lCardW - 4, 88, 6).fill({ color: PixiColorUtil.hexToNum('#ff6578'), alpha: 0.1 });
-              dangerBg.rect(0, 0, 3, 92).fill({ color: PixiColorUtil.hexToNum('#ff6578'), alpha: 0.7 });
-              card.addChild(dangerBg);
-            }
             const icon = new PIXI.Sprite(PixiPremiumAssets.icon(action.icon));
             icon.width = 52;
             icon.height = 52;
             icon.x = 18;
             icon.y = 20;
-            if (action.danger) icon.tint = PixiColorUtil.hexToNum('#ff6578');
             card.addChild(icon);
-            const label = PixiPremiumScene.text(action.label, { fontSize: 20, fontWeight: '900', fill: action.danger ? '#ff6578' : cols.text });
+            const label = PixiPremiumScene.text(action.label, { fontSize: Math.round(20 * s), fontWeight: '900', fill: cols.text });
             label.x = 84;
             label.y = 20;
-            PixiPremiumScene.fit(label, lCardW - 100);
+            PixiPremiumScene.fit(label, 140);
             card.addChild(label);
-            const sub = PixiPremiumScene.text(action.sub, { fontSize: 14, fill: PixiPremiumScene.alpha(action.danger ? '#ff6578' : cols.text, '88') });
+            const sub = PixiPremiumScene.text(action.sub, { fontSize: Math.round(14 * s), fill: PixiPremiumScene.alpha(cols.text, '88') });
             sub.x = 84;
             sub.y = 50;
-            PixiPremiumScene.fit(sub, lCardW - 100, 0.55);
+            PixiPremiumScene.fit(sub, 140, 0.55);
             card.addChild(sub);
           },
         });
@@ -291,15 +282,16 @@ const SettingsScreen = {
 
   sectionTitle(x, y, title, subtitle) {
     const cols = ThemeManager.getCurrentColors();
-    const t = PixiPremiumScene.text(title, { fontSize: 24, fontWeight: '900', fill: cols.text });
+    const sc = Layout.uiScale || 1;
+    const t = PixiPremiumScene.text(title, { fontSize: Math.round(24 * sc), fontWeight: '900', fill: cols.text });
     t.x = x;
     t.y = y;
     this.pixiContainer.addChild(t);
-    const s = PixiPremiumScene.text(subtitle, { fontSize: 15, fill: PixiPremiumScene.alpha(cols.text, '88') });
-    s.x = x;
-    s.y = y + 30;
-    PixiPremiumScene.fit(s, 420);
-    this.pixiContainer.addChild(s);
+    const sub = PixiPremiumScene.text(subtitle, { fontSize: Math.round(15 * sc), fill: PixiPremiumScene.alpha(cols.text, '88') });
+    sub.x = x;
+    sub.y = y + 30;
+    PixiPremiumScene.fit(sub, Math.min(420, Layout.W - 160));
+    this.pixiContainer.addChild(sub);
   },
 
   addSlider(x, y, width, label, value, onChange) {
@@ -322,8 +314,8 @@ const SettingsScreen = {
     });
     slider.x = x;
     slider.y = y;
-    slider._valueText.visible = false;
-    const percent = PixiPremiumScene.text(`${Math.round(value * 100)}%`, { fontSize: 18, fontWeight: '900', fill: cols.accent });
+    const sc = Layout.uiScale || 1;
+    const percent = PixiPremiumScene.text(`${Math.round(value * 100)}%`, { fontSize: Math.round(18 * sc), fontWeight: '900', fill: cols.accent });
     percent.anchor.set(1, 0);
     percent.x = x + width;
     percent.y = y - 34;
@@ -337,20 +329,21 @@ const SettingsScreen = {
 
   nameRow(x, y, label, key, value, cardWidth) {
     const w = cardWidth || 440;
+    const sc = Layout.uiScale || 1;
     PixiPremiumScene.card(this.pixiContainer, x, y, w, 54, {
       onClick: () => {
         this._openNameInput(key, store.get(key) || value);
       },
       draw: (card) => {
         const cols = ThemeManager.getCurrentColors();
-        const l = PixiPremiumScene.text(label, { fontSize: 18, fontWeight: '800', fill: cols.text });
+        const l = PixiPremiumScene.text(label, { fontSize: Math.round(18 * sc), fontWeight: '800', fill: cols.text });
         l.x = 18;
         l.y = 16;
         card.addChild(l);
         const display = this.editingOption === key
           ? `${this.editText}${Math.floor(Date.now() / 500) % 2 === 0 ? '|' : ''}`
           : value;
-        const v = PixiPremiumScene.text(display, { fontSize: 18, fill: this.editingOption === key ? cols.accent : PixiPremiumScene.alpha(cols.text, 'aa') });
+        const v = PixiPremiumScene.text(display, { fontSize: Math.round(18 * sc), fill: this.editingOption === key ? cols.accent : PixiPremiumScene.alpha(cols.text, 'aa') });
         v.anchor.set(1, 0.5);
         v.x = w - 20;
         v.y = 29;
@@ -418,7 +411,8 @@ const SettingsScreen = {
 
   buildResetModal() {
     const cols = ThemeManager.getCurrentColors();
-    const modalW = 420;
+    const s = Layout.uiScale || 1;
+    const modalW = Math.min(420, Layout.W - 60);
     const modalH = 224;
     const modalX = (Layout.W - modalW) / 2;
     const modalY = (Layout.H - modalH) / 2;
@@ -431,12 +425,12 @@ const SettingsScreen = {
     icon.x = Layout.cx - 29;
     icon.y = modalY + 24;
     this.pixiContainer.addChild(icon);
-    const title = PixiPremiumScene.text('Reset all progress?', { fontSize: 25, fontWeight: '900', fill: cols.text });
+    const title = PixiPremiumScene.text('Reset all progress?', { fontSize: Math.round(25 * s), fontWeight: '900', fill: cols.text });
     title.anchor.set(0.5);
     title.x = Layout.cx;
     title.y = modalY + 104;
     this.pixiContainer.addChild(title);
-    const sub = PixiPremiumScene.text('This clears story saves, unlocks, and stats.', { fontSize: 17, fill: PixiPremiumScene.alpha(cols.text, 'aa') });
+    const sub = PixiPremiumScene.text('This clears story saves, unlocks, and stats.', { fontSize: Math.round(17 * s), fill: PixiPremiumScene.alpha(cols.text, 'aa') });
     sub.anchor.set(0.5);
     sub.x = Layout.cx;
     sub.y = modalY + 140;
@@ -454,7 +448,8 @@ const SettingsScreen = {
 
   buildFeedbackModal() {
     const cols = ThemeManager.getCurrentColors();
-    const modalW = 520;
+    const s = Layout.uiScale || 1;
+    const modalW = Math.min(520, Layout.W - 60);
     const modalH = 420;
     const modalX = (Layout.W - modalW) / 2;
     const modalY = (Layout.H - modalH) / 2;
@@ -465,13 +460,13 @@ const SettingsScreen = {
 
     PixiPremiumScene.panel(this.pixiContainer, modalX, modalY, modalW, modalH, { accent: cols.accent, accentAlpha: 0.86, alpha: 0.96 });
 
-    const title = PixiPremiumScene.text('Send Feedback', { fontSize: 26, fontWeight: '900', fill: cols.text });
+    const title = PixiPremiumScene.text('Send Feedback', { fontSize: Math.round(26 * s), fontWeight: '900', fill: cols.text });
     title.anchor.set(0.5, 0);
     title.x = Layout.cx;
     title.y = modalY + 20;
     this.pixiContainer.addChild(title);
 
-    const sub = PixiPremiumScene.text('Suggest a feature, report a bug, or share ideas', { fontSize: 15, fill: PixiPremiumScene.alpha(cols.text, 'aa') });
+    const sub = PixiPremiumScene.text('Suggest a feature, report a bug, or share ideas', { fontSize: Math.round(15 * s), fill: PixiPremiumScene.alpha(cols.text, 'aa') });
     sub.anchor.set(0.5, 0);
     sub.x = Layout.cx;
     sub.y = modalY + 52;
@@ -503,7 +498,7 @@ const SettingsScreen = {
       .stroke({ color: PixiPremiumScene.color(cols.accent), width: 1, alpha: 0.4 });
     this.pixiContainer.addChild(textBg);
 
-    const charCount = PixiPremiumScene.text('0 / 2000', { fontSize: 13, fill: PixiPremiumScene.alpha(cols.text, '55') });
+    const charCount = PixiPremiumScene.text('0 / 2000', { fontSize: Math.round(13 * s), fill: PixiPremiumScene.alpha(cols.text, '55') });
     charCount.anchor.set(1, 0);
     charCount.x = modalX + modalW - 28;
     charCount.y = modalY + 314;
@@ -511,7 +506,7 @@ const SettingsScreen = {
     this._feedbackCharCount = charCount;
 
     if (this.feedbackDone) {
-      const doneText = PixiPremiumScene.text('Feedback sent! Thank you.', { fontSize: 20, fontWeight: '900', fill: '#7dea99' });
+      const doneText = PixiPremiumScene.text('Feedback sent! Thank you.', { fontSize: Math.round(20 * s), fontWeight: '900', fill: '#7dea99' });
       doneText.anchor.set(0.5, 0);
       doneText.x = Layout.cx;
       doneText.y = modalY + 330;
@@ -539,7 +534,7 @@ const SettingsScreen = {
     this._removeTextarea();
     const shell = document.getElementById('gameShell');
     const rect = shell.getBoundingClientRect();
-    const modalW = 520;
+    const modalW = Math.min(520, Layout.W - 60);
     const modalH = 420;
     const modalX = (Layout.W - modalW) / 2;
     const modalY = (Layout.H - modalH) / 2;
