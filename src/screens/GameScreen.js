@@ -277,6 +277,25 @@ const GameScreen = {
       this.renderStatusBar(ctx, cols);
     }
 
+    if (!this.gameOver) {
+      const pauseX = 16;
+      const pauseY = Layout.isPortrait ? 16 : 30;
+      const pauseW = 44;
+      const pauseH = 44;
+      ctx.save();
+      this._roundRect(ctx, pauseX, pauseY, pauseW, pauseH, 8);
+      ctx.fillStyle = cols.panel + 'cc';
+      ctx.fill();
+      ctx.strokeStyle = cols.text + '44';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = cols.text;
+      ctx.fillRect(pauseX + 14, pauseY + 12, 5, 20);
+      ctx.fillRect(pauseX + 25, pauseY + 12, 5, 20);
+      ctx.restore();
+      this._pauseBtnBounds = { x: pauseX, y: pauseY, w: pauseW, h: pauseH };
+    }
+
     if (this.gameOver) {
       if (typeof PixiGameOverOverlay !== 'undefined' && PixiGameOverOverlay.initialized) {
         PixiGameOverOverlay.update(this);
@@ -681,7 +700,15 @@ const GameScreen = {
   },
 
   handleClick(x, y) {
-    // Promotion dialog
+    if (!this.gameOver && !this.promotionPending && this._pauseBtnBounds) {
+      const b = this._pauseBtnBounds;
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+        if (typeof audioManager !== 'undefined' && typeof audioManager.playButton === 'function') audioManager.playButton();
+        PauseMenu.show();
+        return;
+      }
+    }
+
     if (this.promotionPending) {
       const sqSize = 80;
       const types = ['queen', 'rook', 'bishop', 'knight'];
@@ -832,6 +859,14 @@ const GameScreen = {
       }
       canvas.style.cursor = 'default';
       return;
+    }
+
+    if (this._pauseBtnBounds) {
+      const b = this._pauseBtnBounds;
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+        canvas.style.cursor = 'pointer';
+        return;
+      }
     }
 
     let boardPos = null;

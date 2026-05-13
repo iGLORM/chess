@@ -87,32 +87,32 @@ const PauseMenu = {
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.fillRect(0, 0, W, H);
 
-    const modalW = portrait ? 600 : 500;
-    const modalH = portrait ? 600 : 480;
+    const modalW = portrait ? 520 : 400;
+    const modalH = portrait ? 440 : 350;
     const modalX = cx - modalW / 2;
     const modalY = cy - modalH / 2;
 
     UIHelpers.drawPanel(ctx, modalX, modalY, modalW, modalH, cols, { accentTop: true });
 
-    UIHelpers.drawIcon(ctx, cx - 4, modalY + 40, 'gear', 12, cols);
+    UIHelpers.drawIcon(ctx, cx - 4, modalY + 38, 'gear', 10, cols);
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 32px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('PAUSED', cx, modalY + 70);
 
-    UIHelpers.drawSeparator(ctx, modalX + 30, modalY + 88, modalW - 60, cols);
+    UIHelpers.drawSeparator(ctx, modalX + 30, modalY + 95, modalW - 60, cols);
 
     const moveCount = (typeof GameScreen !== 'undefined' && GameScreen.moveHistory) ? GameScreen.moveHistory.length : 0;
     ctx.fillStyle = cols.text + '55';
     ctx.font = '12px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Move ' + moveCount, cx, modalY + 108);
+    ctx.fillText('Move ' + moveCount, cx, modalY + 115);
 
-    const btnW = portrait ? 300 : 200;
-    const btnH = portrait ? 56 : 45;
-    const btnGap = portrait ? 18 : 10;
+    const btnW = portrait ? 280 : 200;
+    const btnH = portrait ? 48 : 40;
+    const btnGap = portrait ? 14 : 10;
     const btnX = cx - btnW / 2;
-    const firstBtnY = modalY + 130;
+    const firstBtnY = modalY + 135;
 
     const buttons = [
       { text: 'Resume', action: 'resume', y: firstBtnY },
