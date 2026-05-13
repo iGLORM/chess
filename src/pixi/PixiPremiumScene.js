@@ -162,6 +162,8 @@ const PixiPremiumScene = {
 
   panel(parent, x, y, w, h, options = {}) {
     const cols = this.cols();
+    const maxW = typeof Layout !== 'undefined' ? Layout.W - 80 : this.W - 80;
+    w = Math.min(w, maxW);
     const g = new PIXI.Graphics();
     const fill = options.fill || cols.panel;
     const border = options.border || cols.text;
@@ -178,6 +180,8 @@ const PixiPremiumScene = {
   },
 
   card(parent, x, y, w, h, options = {}) {
+    const maxW = typeof Layout !== 'undefined' ? Layout.W - 80 : this.W - 80;
+    w = Math.min(w, maxW);
     const group = new PIXI.Container();
     group.x = x;
     group.y = y;

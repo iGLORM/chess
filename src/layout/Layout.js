@@ -19,12 +19,14 @@ const Layout = {
   get safeHeight() { return this.H - this.SAFE_TOP - this.SAFE_BOTTOM; },
 
   get uiScale() {
-    const screenW = window.innerWidth || 800;
-    const screenH = window.innerHeight || 1280;
-    const shorter = Math.min(screenW, screenH);
-    if (shorter < 500) return 1.4;
-    if (shorter < 768) return 1.2;
+    const vw = window.innerWidth;
+    if (vw <= 480) return 1.4;
+    if (vw <= 1024) return 1.2;
     return 1.0;
+  },
+
+  scaledFont(baseSize) {
+    return Math.round(baseSize * (this.uiScale || 1));
   },
 
   _listeners: [],
