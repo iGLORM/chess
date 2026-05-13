@@ -22,6 +22,7 @@ const ModeSelect = {
 
   build() {
     if (this.pixiContainer) this.pixiContainer.destroy({ children: true });
+    const s = Layout.uiScale || 1;
     const title = this.mode === 'story' ? 'Story Mode' : 'Local 1v1';
     this.pixiContainer = PixiPremiumScene.root(title, 'Select your side', {
       footerHint: 'Choose a side to begin',
@@ -31,7 +32,7 @@ const ModeSelect = {
     this.buildSideCards();
 
     const btnY = Layout.isPortrait ? Layout.H - Layout.SAFE_BOTTOM - 48 : 718;
-    PixiPremiumScene.button(this.pixiContainer, 36, btnY, 160, 44, 'Home', () => {
+    PixiPremiumScene.button(this.pixiContainer, 36, btnY, Math.round(160 * s), 44, 'Home', () => {
       if (typeof audioManager !== 'undefined' && audioManager.playButton) audioManager.playButton();
       switchScreen('home');
     }, { icon: 'back' });
@@ -44,25 +45,28 @@ const ModeSelect = {
       { action: 'random', title: 'Random', subtitle: 'Leave it to fate', icon: 'dice', iconColor: 'accent' },
     ];
 
+    const s = Layout.uiScale || 1;
     const portrait = Layout.isPortrait;
-    const cardW = portrait ? 620 : 500;
-    const cardH = portrait ? 80 : 72;
-    const gap = portrait ? 16 : 12;
+    const cardW = portrait ? Math.round(620 * s) : 500;
+    const cardH = portrait ? Math.round(80 * s) : 72;
+    const gap = portrait ? Math.round(16 * s) : 12;
+    const iconSize = Math.round(40 * s);
     const totalH = sides.length * cardH + (sides.length - 1) * gap;
     const panelPad = 24;
-    const panelW = cardW + panelPad * 2;
+    const panelW = Math.min(cardW + panelPad * 2, Layout.W - 80);
     const panelH = totalH + panelPad * 2;
     const panelX = (Layout.W - panelW) / 2;
     const panelY = portrait ? 180 : 200;
+    const effectiveCardW = panelW - panelPad * 2;
 
     PixiPremiumScene.panel(this.pixiContainer, panelX, panelY, panelW, panelH, { accentAlpha: 0.45 });
 
-    const cardX = (Layout.W - cardW) / 2;
+    const cardX = (Layout.W - effectiveCardW) / 2;
     const startY = panelY + panelPad;
 
     sides.forEach((side, i) => {
       const cardY = startY + i * (cardH + gap);
-      const card = PixiPremiumScene.card(this.pixiContainer, cardX, cardY, cardW, cardH, {
+      const card = PixiPremiumScene.card(this.pixiContainer, cardX, cardY, effectiveCardW, cardH, {
         active: i === this.selectedButton,
         alpha: 0.82,
         onClick: () => this.startGame(side.action),
@@ -71,28 +75,29 @@ const ModeSelect = {
           const iconColor = side.iconColor === 'light' ? cols.lightPiece
             : side.iconColor === 'dark' ? cols.darkPiece
             : cols.accent;
-          const iconSprite = PixiIconCache.createSprite(side.icon, 40, cols, { color: iconColor });
+          const iconSprite = PixiIconCache.createSprite(side.icon, iconSize, cols, { color: iconColor });
           iconSprite.x = 20;
-          iconSprite.y = (cardH - 40) / 2;
+          iconSprite.y = (cardH - iconSize) / 2;
           c.addChild(iconSprite);
 
+          const textX = 20 + iconSize + 16;
           const t = PixiPremiumScene.text(side.title, {
-            fontSize: 22,
+            fontSize: Math.round(22 * s),
             fontWeight: '900',
             fill: cols.text,
           });
-          t.x = 76;
-          t.y = cardH / 2 - 14;
-          PixiPremiumScene.fit(t, cardW - 100);
+          t.x = textX;
+          t.y = cardH / 2 - Math.round(14 * s);
+          PixiPremiumScene.fit(t, effectiveCardW - textX - 20);
           c.addChild(t);
 
           const sub = PixiPremiumScene.text(side.subtitle, {
-            fontSize: 14,
+            fontSize: Math.round(14 * s),
             fontWeight: '600',
             fill: PixiPremiumScene.alpha(cols.text, '77'),
           });
-          sub.x = 76;
-          sub.y = cardH / 2 + 10;
+          sub.x = textX;
+          sub.y = cardH / 2 + Math.round(10 * s);
           c.addChild(sub);
         },
       });
