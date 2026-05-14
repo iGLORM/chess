@@ -43,7 +43,10 @@ const PixiScreenManager = {
 
   setScreenContainer(container) {
     this._ensureOnStage();
-    this.screenContainer.removeChildren();
+    const old = this.screenContainer.removeChildren();
+    for (const child of old) {
+      if (child !== container) child.destroy({ children: true });
+    }
     if (container) {
       this.screenContainer.addChild(container);
     }
