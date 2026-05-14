@@ -216,9 +216,9 @@ class BarBalance {
     ctx.restore();
 
     const cx = x + w / 2;
-    const cy = y + 100;
-    const barW = 200;
-    const barH = 10;
+    const cy = y + h * 0.35;
+    const barW = Math.min(w * 0.7, 300);
+    const barH = Math.max(8, h * 0.025);
 
     // Balance meter: thin glowing line at center
     const balanceRatio = 1 - Math.min(1, Math.abs(this.angle) / 1.2);
@@ -228,25 +228,27 @@ class BarBalance {
     ctx.shadowBlur = balanceRatio * 16;
     ctx.strokeStyle = cols.accent;
     ctx.lineWidth = 2;
+    const meterLen = barW * 0.35;
     ctx.beginPath();
-    ctx.moveTo(cx, cy - 55);
-    ctx.lineTo(cx, cy + 15);
+    ctx.moveTo(cx, cy - meterLen);
+    ctx.lineTo(cx, cy + meterLen * 0.27);
     ctx.stroke();
     ctx.restore();
 
     // Pivot triangle
+    const pivotR = Math.max(5, barW * 0.035);
     ctx.fillStyle = cols.text + '66';
     ctx.beginPath();
-    ctx.moveTo(cx, cy + 8);
-    ctx.lineTo(cx - 8, cy + 18);
-    ctx.lineTo(cx + 8, cy + 18);
+    ctx.moveTo(cx, cy + pivotR * 1.3);
+    ctx.lineTo(cx - pivotR * 1.3, cy + pivotR * 3);
+    ctx.lineTo(cx + pivotR * 1.3, cy + pivotR * 3);
     ctx.closePath();
     ctx.fill();
 
     // Pivot circle
     ctx.fillStyle = cols.text + '55';
     ctx.beginPath();
-    ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+    ctx.arc(cx, cy, pivotR, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = cols.text + '88';
     ctx.lineWidth = 1;
@@ -288,7 +290,7 @@ class BarBalance {
 
     // Ball / weight indicator on the bar
     const ballOffset = this.angle * barW * 0.4;
-    const ballRadius = 10;
+    const ballRadius = Math.max(7, barW * 0.05);
 
     // Ball shadow
     ctx.save();
@@ -326,7 +328,7 @@ class BarBalance {
     ctx.restore();
 
     // End caps / weights on bar ends
-    const capSize = 14;
+    const capSize = Math.max(10, barW * 0.07);
     ctx.fillStyle = MiniGameUtils.darkenColor(isBalanced ? cols.accent : (cols.highlight || cols.accent), 30);
     ctx.beginPath();
     ctx.arc(-barW / 2, 0, capSize / 2, 0, Math.PI * 2);
@@ -358,23 +360,25 @@ class BarBalance {
 
     ctx.restore(); // un-rotate
 
-    // Angle text
+    // Angle text — positioned below the bar area
+    const textBase = cy + barW * 0.35 + 20;
+    const textGap = Math.max(16, h * 0.04);
     ctx.fillStyle = cols.text;
     ctx.font = '12px "Pixelify Sans", sans-serif';
-    ctx.fillText('Angle: ' + Math.round(this.angle * 57.3) + '°', x + w / 2, y + 155);
-    ctx.fillText('Time: ' + Math.ceil(this.timeLeft) + 's', x + w / 2, y + 175);
+    ctx.fillText('Angle: ' + Math.round(this.angle * 57.3) + '°', x + w / 2, textBase);
+    ctx.fillText('Time: ' + Math.ceil(this.timeLeft) + 's', x + w / 2, textBase + textGap);
 
     // Balance quality indicator
     ctx.font = '10px "Pixelify Sans", sans-serif';
     if (balanceRatio > 0.8) {
       ctx.fillStyle = cols.accent;
-      ctx.fillText('STEADY', x + w / 2, y + 192);
+      ctx.fillText('STEADY', x + w / 2, textBase + textGap * 2);
     } else if (balanceRatio > 0.5) {
       ctx.fillStyle = cols.text + 'aa';
-      ctx.fillText('WOBBLING', x + w / 2, y + 192);
+      ctx.fillText('WOBBLING', x + w / 2, textBase + textGap * 2);
     } else {
       ctx.fillStyle = cols.highlight || cols.accent;
-      ctx.fillText('DANGER!', x + w / 2, y + 192);
+      ctx.fillText('DANGER!', x + w / 2, textBase + textGap * 2);
     }
 
     if (this.done) {

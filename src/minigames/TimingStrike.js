@@ -124,37 +124,48 @@ class TimingStrike {
     const theme = ThemeManager.getTheme(store.get('theme'));
     const cols = theme.colors;
 
+    // Scale fonts based on available height
+    const titleSize = Math.max(18, Math.min(24, h * 0.035));
+    const bodySize = Math.max(12, Math.min(16, h * 0.022));
+    const labelSize = Math.max(10, Math.min(14, h * 0.018));
+
     ctx.fillStyle = cols.background || cols.bg || cols.panel;
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = cols.accent;
     ctx.lineWidth = 3;
     ctx.strokeRect(x, y, w, h);
 
+    // Title area: top 15% of available height
+    const titleY = y + h * 0.06;
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + Math.round(titleSize) + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('TIMING STRIKE', x + w / 2, y + 35);
+    ctx.fillText('TIMING STRIKE', x + w / 2, titleY);
 
-    ctx.font = 'bold 12px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + Math.round(bodySize) + 'px "Pixelify Sans", sans-serif';
     ctx.fillStyle = cols.text + '88';
-    ctx.fillText('Stop the bar in the green zone!', x + w / 2, y + 55);
+    ctx.fillText('Stop the bar in the green zone!', x + w / 2, titleY + titleSize * 1.3);
 
-    // Score
+    // Score panel
+    const scoreY = titleY + titleSize * 2.2;
+    const scorePanelW = Math.min(220, w * 0.5);
+    const scorePanelH = Math.max(24, h * 0.04);
     ctx.save();
     ctx.fillStyle = cols.panel + 'dd';
     ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(x + w / 2 - 95, y + 64, 190, 24, 6) : ctx.rect(x + w / 2 - 95, y + 64, 190, 24);
+    ctx.roundRect ? ctx.roundRect(x + w / 2 - scorePanelW / 2, scoreY, scorePanelW, scorePanelH, 6) : ctx.rect(x + w / 2 - scorePanelW / 2, scoreY, scorePanelW, scorePanelH);
     ctx.fill();
     ctx.restore();
     ctx.fillStyle = cols.accent;
-    ctx.font = 'bold 14px "Pixelify Sans", sans-serif';
-    ctx.fillText('Score: ' + this.score + '/300', x + w / 2, y + 78);
+    ctx.font = 'bold ' + Math.round(bodySize + 1) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText('Score: ' + this.score + '/300', x + w / 2, scoreY + scorePanelH * 0.65);
 
-    // The bar
-    const barX = x + 80;
-    const barY = y + 110;
-    const barW = w - 160;
-    const barH = 40;
+    // The bar - centered vertically around 45% of height
+    const barMargin = w * 0.075;
+    const barX = x + barMargin;
+    const barY = y + h * 0.45;
+    const barW = w - barMargin * 2;
+    const barH = Math.max(36, h * 0.065);
 
     // Bar track with subtle gradient
     const grad = ctx.createLinearGradient(barX, barY, barX, barY + barH);
@@ -192,15 +203,16 @@ class TimingStrike {
 
     // The moving marker with glow
     const markerX = barX + (this.pos / 100) * barW;
+    const markerSize = Math.max(6, barH * 0.18);
     ctx.shadowColor = cols.highlight || cols.accent;
     ctx.shadowBlur = 10;
     ctx.fillStyle = cols.highlight || cols.accent;
     ctx.beginPath();
-    ctx.moveTo(markerX, barY - 8);
-    ctx.lineTo(markerX - 6, barY - 2);
-    ctx.lineTo(markerX - 4, barY + barH + 2);
-    ctx.lineTo(markerX + 4, barY + barH + 2);
-    ctx.lineTo(markerX + 6, barY - 2);
+    ctx.moveTo(markerX, barY - markerSize * 1.3);
+    ctx.lineTo(markerX - markerSize, barY - markerSize * 0.3);
+    ctx.lineTo(markerX - markerSize * 0.7, barY + barH + markerSize * 0.3);
+    ctx.lineTo(markerX + markerSize * 0.7, barY + barH + markerSize * 0.3);
+    ctx.lineTo(markerX + markerSize, barY - markerSize * 0.3);
     ctx.closePath();
     ctx.fill();
     ctx.shadowBlur = 0;
@@ -218,22 +230,22 @@ class TimingStrike {
 
     // Labels
     ctx.fillStyle = cols.text + '66';
-    ctx.font = '10px "Pixelify Sans", sans-serif';
+    ctx.font = Math.round(labelSize) + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('0%', barX, barY + barH + 20);
-    ctx.fillText('100%', barX + barW, barY + barH + 20);
+    ctx.fillText('0%', barX, barY + barH + labelSize * 1.8);
+    ctx.fillText('100%', barX + barW, barY + barH + labelSize * 1.8);
 
     // Hit indicator
     if (!this.waitingForStrike && !this.done) {
       ctx.fillStyle = cols.text + '88';
-      ctx.font = '14px "Pixelify Sans", sans-serif';
-      ctx.fillText('Get ready...', x + w / 2, barY + barH + 50);
+      ctx.font = Math.round(bodySize + 1) + 'px "Pixelify Sans", sans-serif';
+      ctx.fillText('Get ready...', x + w / 2, barY + barH + h * 0.1);
     }
 
     // Strikes
     ctx.fillStyle = cols.text + '66';
-    ctx.font = '11px "Pixelify Sans", sans-serif';
-    ctx.fillText('Strike ' + (this.strikes + 1) + '/' + this.maxStrikes, x + w / 2, y + 220);
+    ctx.font = Math.round(labelSize + 1) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText('Strike ' + (this.strikes + 1) + '/' + this.maxStrikes, x + w / 2, barY + barH + h * 0.12);
 
     if (this.flashTimer > 0) {
       ctx.fillStyle = 'rgba(255,255,255,' + (this.flashTimer / 0.18 * 0.28).toFixed(3) + ')';
@@ -241,15 +253,7 @@ class TimingStrike {
     }
 
     if (this.done) {
-      const win = this.winner === 'attacker';
-      ctx.fillStyle = win ? 'rgba(80, 220, 130, 0.30)' : 'rgba(220, 70, 80, 0.30)';
-      ctx.fillRect(x, y, w, h);
-      ctx.fillStyle = cols.text;
-      ctx.shadowColor = win ? cols.accent : (cols.highlight || cols.accent);
-      ctx.shadowBlur = 14;
-      ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
-      ctx.fillText(win ? 'You Win!' : 'You Lose!', x + w / 2, y + h / 2);
-      ctx.shadowBlur = 0;
+      MiniGameUtils.drawResultOverlay(ctx, x, y, w, h, this.winner === 'attacker', cols);
     }
   }
 

@@ -126,25 +126,36 @@ class CoinFlip {
     ctx.lineWidth = 3;
     ctx.strokeRect(x, y, w, h);
 
+    // Scale fonts based on available height
+    const titleSize = Math.max(18, Math.min(24, h * 0.035));
+    const bodySize = Math.max(12, Math.min(16, h * 0.022));
+    const labelSize = Math.max(13, Math.min(16, h * 0.02));
+
+    const titleY = y + h * 0.06;
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + Math.round(titleSize) + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('COIN FLIP', x + w / 2, y + 30);
-    ctx.font = 'bold 12px "Pixelify Sans", sans-serif';
+    ctx.fillText('COIN FLIP', x + w / 2, titleY);
+    ctx.font = 'bold ' + Math.round(bodySize) + 'px "Pixelify Sans", sans-serif';
     ctx.fillStyle = cols.text + '88';
-    ctx.fillText('Pick Heads or Tails! Round ' + (this.round + 1) + '/' + this.maxRounds, x + w / 2, y + 50);
+    ctx.fillText('Pick Heads or Tails! Round ' + (this.round + 1) + '/' + this.maxRounds, x + w / 2, titleY + titleSize * 1.3);
 
     // Score
+    const scoreY = titleY + titleSize * 2.2;
+    const scorePanelW = Math.min(260, w * 0.6);
+    const scorePanelH = Math.max(24, h * 0.04);
     ctx.fillStyle = cols.panel + 'dd';
-    ctx.fillRect(x + w / 2 - 130, y + 58, 260, 24);
+    ctx.fillRect(x + w / 2 - scorePanelW / 2, scoreY, scorePanelW, scorePanelH);
     ctx.fillStyle = cols.accent;
-    ctx.font = 'bold 13px "Pixelify Sans", sans-serif';
-    ctx.fillText('You: ' + this.playerScore + ' | Defender: ' + this.cpuScore, x + w / 2, y + 70);
+    ctx.font = 'bold ' + Math.round(bodySize + 1) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText('You: ' + this.playerScore + ' | Defender: ' + this.cpuScore, x + w / 2, scoreY + scorePanelH * 0.65);
 
-    // Coin
+    // Coin - centered vertically in the space between score and buttons
     const cx = x + w / 2;
-    const cy = y + 150;
-    const coinSize = 60;
+    const coinSize = Math.max(40, Math.min(80, Math.min(w, h) * 0.12));
+    // Coin center at ~40% of height
+    const cy = y + h * 0.4;
+    const coinFontSize = Math.max(16, coinSize * 0.3);
 
     if (this.flipping) {
       // Animate coin with 3D flip effect
@@ -169,9 +180,9 @@ class CoinFlip {
       ctx.arc(0, 0, coinSize * 0.75, 0, Math.PI * 2);
       ctx.stroke();
       ctx.fillStyle = cols.panel;
-      ctx.font = 'bold 20px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + Math.round(coinFontSize) + 'px "Pixelify Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('?', 0, 7);
+      ctx.fillText('?', 0, coinFontSize * 0.35);
       ctx.restore();
     } else {
       // Show result
@@ -206,12 +217,12 @@ class CoinFlip {
 
       if (this.flipResult) {
         ctx.fillStyle = cols.panel;
-        ctx.font = 'bold 16px "Pixelify Sans", sans-serif';
-        ctx.fillText(this.flipResult.toUpperCase(), cx, cy + 5);
+        ctx.font = 'bold ' + Math.round(coinFontSize) + 'px "Pixelify Sans", sans-serif';
+        ctx.fillText(this.flipResult.toUpperCase(), cx, cy + coinFontSize * 0.3);
       } else {
         ctx.fillStyle = cols.panel;
-        ctx.font = 'bold 20px "Pixelify Sans", sans-serif';
-        ctx.fillText('?', cx, cy + 6);
+        ctx.font = 'bold ' + Math.round(coinFontSize + 4) + 'px "Pixelify Sans", sans-serif';
+        ctx.fillText('?', cx, cy + coinFontSize * 0.3);
       }
     }
 
@@ -228,27 +239,34 @@ class CoinFlip {
       ctx.restore();
     }
 
-    // Buttons
+    // Buttons - positioned below the coin with proper spacing
     if (!this.flipping && !this.done) {
+      const btnW = Math.max(120, Math.min(180, w * 0.28));
+      const btnH = Math.max(60, Math.min(70, h * 0.09));
+      const btnGap = Math.max(20, w * 0.04);
+      const btnY = cy + coinSize + Math.max(30, h * 0.06);
+
       // Heads
+      const headsX = x + w / 2 - btnW - btnGap / 2;
       ctx.fillStyle = cols.buttonBg;
-      ctx.fillRect(x + 100, y + 210, 180, 45);
+      ctx.fillRect(headsX, btnY, btnW, btnH);
       ctx.strokeStyle = cols.text + '44';
       ctx.lineWidth = 1;
-      ctx.strokeRect(x + 100, y + 210, 180, 45);
+      ctx.strokeRect(headsX, btnY, btnW, btnH);
       ctx.fillStyle = cols.text;
-      ctx.font = '14px "Pixelify Sans", sans-serif';
-      ctx.fillText('HEADS', x + 190, y + 237);
+      ctx.font = Math.round(labelSize) + 'px "Pixelify Sans", sans-serif';
+      ctx.fillText('HEADS', headsX + btnW / 2, btnY + btnH / 2 + labelSize * 0.35);
 
       // Tails
+      const tailsX = x + w / 2 + btnGap / 2;
       ctx.fillStyle = cols.buttonBg;
-      ctx.fillRect(x + w - 280, y + 210, 180, 45);
+      ctx.fillRect(tailsX, btnY, btnW, btnH);
       ctx.strokeStyle = cols.text + '44';
       ctx.lineWidth = 1;
-      ctx.strokeRect(x + w - 280, y + 210, 180, 45);
+      ctx.strokeRect(tailsX, btnY, btnW, btnH);
       ctx.fillStyle = cols.text;
-      ctx.font = '14px "Pixelify Sans", sans-serif';
-      ctx.fillText('TAILS', x + w - 190, y + 237);
+      ctx.font = Math.round(labelSize) + 'px "Pixelify Sans", sans-serif';
+      ctx.fillText('TAILS', tailsX + btnW / 2, btnY + btnH / 2 + labelSize * 0.35);
     }
 
     if (this.done) {

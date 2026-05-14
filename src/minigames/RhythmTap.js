@@ -121,59 +121,70 @@ class RhythmTap {
     ctx.lineWidth = 3;
     ctx.strokeRect(x, y, w, h);
 
-    ctx.fillStyle = cols.text;
-    ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('RHYTHM TAP', x + w / 2, y + 30);
-    ctx.font = 'bold 12px "Pixelify Sans", sans-serif';
-    ctx.fillStyle = cols.text + '88';
-    ctx.fillText('Tap when the blocks reach the green zone!', x + w / 2, y + 50);
+    // Scale fonts based on available height
+    const titleSize = Math.max(18, Math.min(24, h * 0.035));
+    const bodySize = Math.max(12, Math.min(16, h * 0.022));
+    const labelSize = Math.max(11, Math.min(14, h * 0.018));
 
-    // Track
-    const trackX = x + 20;
-    const trackY = y + h * 0.28;
-    const trackW = w - 40;
+    const titleY = y + h * 0.06;
+    ctx.fillStyle = cols.text;
+    ctx.font = 'bold ' + Math.round(titleSize) + 'px "Pixelify Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('RHYTHM TAP', x + w / 2, titleY);
+    ctx.font = 'bold ' + Math.round(bodySize) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillStyle = cols.text + '88';
+    ctx.fillText('Tap when the blocks reach the green zone!', x + w / 2, titleY + titleSize * 1.3);
+
+    // Track - centered around 35% of height
+    const trackMargin = w * 0.04;
+    const trackX = x + trackMargin;
+    const trackY = y + h * 0.35;
+    const trackW = w - trackMargin * 2;
+    const trackH = Math.max(30, h * 0.06);
     this.lastTrackW = trackW;
     ctx.fillStyle = cols.text + '11';
-    ctx.fillRect(trackX, trackY, trackW, 30);
+    ctx.fillRect(trackX, trackY, trackW, trackH);
 
-    // Target zone with glow
+    // Target zone with glow - scale zone width relative to track
     const pulse = 0.5 + 0.5 * Math.sin((this.beatTimer / this.beatInterval) * Math.PI * 2);
     const targetX = trackX + trackW * 0.455;
+    const zoneHalfW = Math.max(25, trackW * 0.04);
     ctx.shadowColor = cols.accent;
     ctx.shadowBlur = 8 + pulse * 16;
     ctx.fillStyle = cols.accent + '66';
-    ctx.fillRect(targetX - 25, trackY, 50, 30);
+    ctx.fillRect(targetX - zoneHalfW, trackY, zoneHalfW * 2, trackH);
     ctx.strokeStyle = cols.highlight || cols.accent;
     ctx.lineWidth = 2;
-    ctx.strokeRect(targetX - 25, trackY, 50, 30);
+    ctx.strokeRect(targetX - zoneHalfW, trackY, zoneHalfW * 2, trackH);
     ctx.shadowBlur = 0;
 
-    // Beats with rounded rects and glow
+    // Beats with rounded rects and glow - scale block size relative to track
+    const blockW = Math.max(16, trackH * 0.5);
+    const blockH = Math.max(20, trackH * 0.7);
+    const blockR = Math.max(3, blockW * 0.2);
     for (const b of this.beats) {
-      const bx = trackX + b.x - 8;
-      const by = trackY + 5;
+      const bx = trackX + b.x - blockW / 2;
+      const by = trackY + (trackH - blockH) / 2;
       ctx.shadowColor = b.hit ? cols.accent : (cols.highlight || cols.accent);
       ctx.shadowBlur = b.hit ? 12 : 6;
       ctx.fillStyle = b.hit ? cols.accent : (cols.highlight || cols.accent);
       // Rounded rect
-      const r = 4;
       ctx.beginPath();
-      ctx.moveTo(bx + r, by);
-      ctx.lineTo(bx + 16 - r, by);
-      ctx.arcTo(bx + 16, by, bx + 16, by + r, r);
-      ctx.lineTo(bx + 16, by + 20 - r);
-      ctx.arcTo(bx + 16, by + 20, bx + 16 - r, by + 20, r);
-      ctx.lineTo(bx + r, by + 20);
-      ctx.arcTo(bx, by + 20, bx, by + 20 - r, r);
-      ctx.lineTo(bx, by + r);
-      ctx.arcTo(bx, by, bx + r, by, r);
+      ctx.moveTo(bx + blockR, by);
+      ctx.lineTo(bx + blockW - blockR, by);
+      ctx.arcTo(bx + blockW, by, bx + blockW, by + blockR, blockR);
+      ctx.lineTo(bx + blockW, by + blockH - blockR);
+      ctx.arcTo(bx + blockW, by + blockH, bx + blockW - blockR, by + blockH, blockR);
+      ctx.lineTo(bx + blockR, by + blockH);
+      ctx.arcTo(bx, by + blockH, bx, by + blockH - blockR, blockR);
+      ctx.lineTo(bx, by + blockR);
+      ctx.arcTo(bx, by, bx + blockR, by, blockR);
       ctx.closePath();
       ctx.fill();
       ctx.shadowBlur = 0;
       // Inner highlight
       ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      ctx.fillRect(bx + 3, by + 2, 10, 6);
+      ctx.fillRect(bx + 3, by + 2, blockW * 0.6, blockH * 0.3);
     }
 
     for (const f of this.feedbacks) {
@@ -181,32 +192,35 @@ class RhythmTap {
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.fillStyle = f.accuracy > 0 ? cols.accent : (cols.highlight || cols.text);
-      ctx.font = 'bold 13px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + Math.round(bodySize + 1) + 'px "Pixelify Sans", sans-serif';
       ctx.shadowColor = ctx.fillStyle;
       ctx.shadowBlur = 8;
-      ctx.fillText(f.text, x + w / 2, trackY - 18 + f.y);
+      ctx.fillText(f.text, x + w / 2, trackY - h * 0.03 + f.y);
       ctx.restore();
     }
 
-    // Score panel
-    MiniGameUtils.roundRect(ctx, x + w / 2 - 150, trackY + 48, 300, 48, 7);
+    // Score panel - positioned relative to track
+    const scorePanelW = Math.min(300, w * 0.7);
+    const scorePanelH = Math.max(48, h * 0.08);
+    const scorePanelY = trackY + trackH + h * 0.05;
+    MiniGameUtils.roundRect(ctx, x + w / 2 - scorePanelW / 2, scorePanelY, scorePanelW, scorePanelH, 7);
     ctx.fillStyle = cols.panel + 'dd';
     ctx.fill();
     ctx.fillStyle = cols.accent;
-    ctx.font = 'bold 13px "Pixelify Sans", sans-serif';
-    ctx.fillText('Score: ' + this.score + ' | Time: ' + Math.ceil(this.timeLeft) + 's', x + w / 2, trackY + 68);
+    ctx.font = 'bold ' + Math.round(labelSize + 1) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText('Score: ' + this.score + ' | Time: ' + Math.ceil(this.timeLeft) + 's', x + w / 2, scorePanelY + scorePanelH * 0.4);
 
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 13px "Pixelify Sans", sans-serif';
-    ctx.fillText('Combo: ' + this.combo, x + w / 2, trackY + 88);
+    ctx.font = 'bold ' + Math.round(labelSize + 1) + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText('Combo: ' + this.combo, x + w / 2, scorePanelY + scorePanelH * 0.75);
 
     if (this.combo > 2) {
       ctx.save();
       ctx.fillStyle = cols.highlight || cols.accent;
-      ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + Math.round(titleSize) + 'px "Pixelify Sans", sans-serif';
       ctx.shadowColor = ctx.fillStyle;
       ctx.shadowBlur = 12;
-      ctx.fillText(this.combo + 'x', x + w / 2, trackY + 128);
+      ctx.fillText(this.combo + 'x', x + w / 2, scorePanelY + scorePanelH + h * 0.06);
       ctx.restore();
     }
 

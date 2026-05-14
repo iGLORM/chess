@@ -174,6 +174,26 @@ class QuickClick {
     const cols = theme.colors;
     this.lastRect = { x, y, w, h };
 
+    // Responsive font sizes (scale with area, clamped)
+    const scale = Math.min(w / 480, h / 260);
+    const titleSize = Math.round(Math.max(16, Math.min(24, 18 * scale)));
+    const subtitleSize = Math.round(Math.max(10, Math.min(16, 12 * scale)));
+    const timerSize = Math.round(Math.max(22, Math.min(36, 28 * scale)));
+    const labelSize = Math.round(Math.max(10, Math.min(16, 12 * scale)));
+    const comboSize = Math.round(Math.max(18, Math.min(28, 22 * scale)));
+    const instrSize = Math.round(Math.max(10, Math.min(16, 13 * scale)));
+    const resultSize = Math.round(Math.max(16, Math.min(24, 18 * scale)));
+
+    // Layout: divide the vertical space into zones
+    // Top zone: title + subtitle + timer (uses ~35% of height)
+    // Middle zone: progress bars + combo (uses ~25% of height)
+    // Bottom zone: tap area with instructions (uses ~40% of height)
+    const topZoneEnd = y + h * 0.35;
+    const midZoneStart = topZoneEnd;
+    const midZoneEnd = y + h * 0.55;
+    const botZoneStart = midZoneEnd;
+    const centerX = x + w / 2;
+
     // Apply screen shake offset
     let shakeX = 0, shakeY = 0;
     if (this.shakeTimer > 0) {
@@ -205,18 +225,23 @@ class QuickClick {
       ctx.fillRect(x, y, w, h);
     }
 
+    // --- TOP ZONE: Title, subtitle, timer ---
+    const titleY = y + h * 0.10;
+    const subtitleY = y + h * 0.17;
+    const timerY = y + h * 0.28;
+
     // Title
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + titleSize + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('QUICK CLICK!', x + w / 2, y + 40);
+    ctx.fillText('QUICK CLICK!', centerX, titleY);
 
     // Subtitle
-    ctx.font = 'bold 12px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + subtitleSize + 'px "Pixelify Sans", sans-serif';
     ctx.save();
     ctx.fillStyle = cols.text;
     ctx.globalAlpha = 0.5;
-    ctx.fillText('Click as fast as you can!', x + w / 2, y + 60);
+    ctx.fillText('Click as fast as you can!', centerX, subtitleY);
     ctx.restore();
 
     // Timer
@@ -227,19 +252,21 @@ class QuickClick {
       ctx.shadowBlur = 10;
     }
     ctx.fillStyle = timerColor;
-    ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
-    ctx.fillText(Math.ceil(this.timeLeft) + 's', x + w / 2, y + 110);
+    ctx.font = 'bold ' + timerSize + 'px "Pixelify Sans", sans-serif';
+    ctx.fillText(Math.ceil(this.timeLeft) + 's', centerX, timerY);
     ctx.restore();
 
-    // Progress bars
-    const barW = 200;
-    const barH = 30;
+    // --- MIDDLE ZONE: Progress bars ---
+    const barW = Math.min(w * 0.38, 280);
+    const barH = Math.round(Math.max(24, Math.min(36, 30 * scale)));
     const barRadius = 6;
     const maxClicks = 20;
+    const barGap = Math.round(Math.max(10, w * 0.04));
+    const barY = midZoneStart + (midZoneEnd - midZoneStart) * 0.25;
 
     // --- Attacker (Player 1) bar ---
-    const a1x = x + w / 2 - barW - 20;
-    const a1y = y + 140;
+    const a1x = centerX - barW - barGap / 2;
+    const a1y = barY;
     const a1Fill = Math.min(1, this.p1Clicks / maxClicks);
 
     // Background track
@@ -277,13 +304,13 @@ class QuickClick {
 
     // Label
     ctx.fillStyle = cols.text;
-    ctx.font = '12px "Pixelify Sans", sans-serif';
+    ctx.font = labelSize + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('You: ' + this.p1Clicks, a1x + barW / 2, a1y + barH / 2 + 4);
 
     // --- Defender (Player 2 / CPU) bar ---
-    const a2x = x + w / 2 + 20;
-    const a2y = y + 140;
+    const a2x = centerX + barGap / 2;
+    const a2y = barY;
     const a2Fill = Math.min(1, this.p2Clicks / maxClicks);
 
     // Background track
@@ -321,22 +348,62 @@ class QuickClick {
 
     // Label
     ctx.fillStyle = cols.text;
-    ctx.font = '12px "Pixelify Sans", sans-serif';
+    ctx.font = labelSize + 'px "Pixelify Sans", sans-serif';
     ctx.fillText('Defender: ' + this.p2Clicks, a2x + barW / 2, a2y + barH / 2 + 4);
 
-    // Combo counter
+    // Combo counter (between bars and tap zone)
     if (this.comboCount >= 2 && this.comboTimer > 0) {
       const comboAlpha = Math.min(1, this.comboTimer / 0.2);
+      const comboY = barY + barH + (midZoneEnd - barY - barH) * 0.6;
       ctx.save();
       ctx.globalAlpha = comboAlpha;
       ctx.shadowColor = cols.accent;
       ctx.shadowBlur = 16;
       ctx.fillStyle = cols.accent;
-      ctx.font = 'bold 22px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + comboSize + 'px "Pixelify Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(this.comboCount + 'x COMBO!', x + w / 2, y + 195);
+      ctx.fillText(this.comboCount + 'x COMBO!', centerX, comboY);
       ctx.restore();
     }
+
+    // --- BOTTOM ZONE: Tap area ---
+    const tapPad = Math.round(w * 0.06);
+    const tapX = x + tapPad;
+    const tapY = botZoneStart + Math.round(h * 0.03);
+    const tapW = w - tapPad * 2;
+    const tapH = (y + h) - tapY - Math.round(h * 0.04);
+    const tapR = 10;
+
+    // Tap zone background (pulsing border to invite clicking)
+    ctx.save();
+    const pulse = 0.15 + 0.1 * Math.sin(Date.now() / 200);
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = cols.accent;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    this._drawRoundedBar(ctx, tapX, tapY, tapW, tapH, tapR);
+    ctx.stroke();
+    ctx.restore();
+
+    // "TAP HERE!" label centered in the tap zone
+    ctx.save();
+    ctx.fillStyle = cols.text;
+    ctx.globalAlpha = 0.3 + 0.15 * Math.sin(Date.now() / 300);
+    ctx.font = 'bold ' + Math.round(instrSize * 1.8) + 'px "Pixelify Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TAP HERE!', centerX, tapY + tapH * 0.45);
+    ctx.restore();
+
+    // Small instruction text below the tap label
+    ctx.save();
+    ctx.fillStyle = cols.text;
+    ctx.font = instrSize + 'px "Pixelify Sans", sans-serif';
+    ctx.globalAlpha = 0.35;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Click / tap anywhere to mash!', centerX, tapY + tapH * 0.75);
+    ctx.restore();
 
     // Particles
     for (const p of this.particles) {
@@ -361,14 +428,6 @@ class QuickClick {
       ctx.restore();
     }
 
-    // Instructions
-    ctx.save();
-    ctx.fillStyle = cols.text;
-    ctx.font = '11px "Pixelify Sans", sans-serif';
-    ctx.globalAlpha = 0.4;
-    ctx.fillText('Click anywhere to mash!', x + w / 2, y + 220);
-    ctx.restore();
-
     // Result
     if (this.done) {
       ctx.save();
@@ -378,11 +437,11 @@ class QuickClick {
       ctx.shadowColor = win ? cols.accent : (cols.highlight || cols.accent);
       ctx.shadowBlur = 14;
       ctx.fillStyle = cols.text;
-      ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+      ctx.font = 'bold ' + resultSize + 'px "Pixelify Sans", sans-serif';
       if (this.winner === 'attacker') {
-        ctx.fillText('You Win!', x + w / 2, y + h / 2);
+        ctx.fillText('You Win!', centerX, y + h / 2);
       } else {
-        ctx.fillText('You Lose!', x + w / 2, y + h / 2);
+        ctx.fillText('You Lose!', centerX, y + h / 2);
       }
       ctx.restore();
     }

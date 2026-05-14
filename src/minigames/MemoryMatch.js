@@ -96,16 +96,25 @@ class MemoryMatch {
     }
   }
 
-  handleClickAtIndex(idx) {
-    const cardW = 55;
-    const cardH = 65;
-    const gap = 10;
-    const rect = this.lastRect || { x: 0, y: 0, w: 1, h: 1 };
-    const gameX = rect.x;
-    const gameY = rect.y;
+  _cardLayout(rect) {
+    const w = rect.w;
+    const h = rect.h;
+    const gap = Math.max(8, Math.min(14, w * 0.02));
+    const headerSpace = h * 0.15;
+    const availW = w - gap * 2;
+    const availH = h - headerSpace - h * 0.08;
+    const cardW = Math.max(60, Math.min((availW - gap * 3) / 4, (availH - gap) / 2));
+    const cardH = Math.max(80, cardW * 1.2);
     const totalW = 4 * (cardW + gap) - gap;
-    const startX = gameX + (rect.w - totalW) / 2;
-    const startY = gameY + 80;
+    const totalH = 2 * (cardH + gap) - gap;
+    const startX = rect.x + (w - totalW) / 2;
+    const startY = rect.y + headerSpace + (availH - totalH) / 2;
+    return { cardW, cardH, gap, startX, startY };
+  }
+
+  handleClickAtIndex(idx) {
+    const rect = this.lastRect || { x: 0, y: 0, w: 1, h: 1 };
+    const { cardW, cardH, gap, startX, startY } = this._cardLayout(rect);
     const col = idx % 4;
     const row = Math.floor(idx / 4);
     const screenX = startX + col * (cardW + gap) + cardW / 2;
@@ -116,20 +125,8 @@ class MemoryMatch {
   handleClick(screenX, screenY) {
     if (!this.canFlip || this.done) return;
 
-    const cardW = 55;
-    const cardH = 65;
-    const gap = 10;
-    const gridW = 4;
-    const gridH = 2;
-    const totalW = gridW * (cardW + gap) - gap;
-    const totalH = gridH * (cardH + gap) - gap;
-
-    // Game render area bounds
     const rect = this.lastRect || { x: 0, y: 0, w: 1, h: 1 };
-    const gameX = rect.x;
-    const gameY = rect.y;
-    const startX = gameX + (rect.w - totalW) / 2;
-    const startY = gameY + 80;
+    const { cardW, cardH, gap, startX, startY } = this._cardLayout(rect);
 
     const col = Math.floor((screenX - startX) / (cardW + gap));
     const row = Math.floor((screenY - startY) / (cardH + gap));
@@ -171,31 +168,32 @@ class MemoryMatch {
     const cols = theme.colors;
     this.lastRect = { x, y, w, h };
 
+    // Scale fonts based on available height
+    const titleSize = Math.max(18, Math.min(24, h * 0.035));
+    const bodySize = Math.max(12, Math.min(16, h * 0.022));
+    const labelSize = Math.max(11, Math.min(14, h * 0.018));
+
     ctx.fillStyle = cols.background || cols.bg || cols.panel;
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = cols.accent;
     ctx.lineWidth = 3;
     ctx.strokeRect(x, y, w, h);
 
+    const titleY = y + h * 0.06;
     ctx.fillStyle = cols.text;
-    ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + Math.round(titleSize) + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('MEMORY MATCH', x + w / 2, y + 35);
+    ctx.fillText('MEMORY MATCH', x + w / 2, titleY);
 
-    ctx.font = 'bold 12px "Pixelify Sans", sans-serif';
+    ctx.font = 'bold ' + Math.round(bodySize) + 'px "Pixelify Sans", sans-serif';
     ctx.fillStyle = cols.text + '88';
-    ctx.fillText('Match the pairs! Attempts: ' + this.attempts + '/' + this.maxAttempts, x + w / 2, y + 55);
+    ctx.fillText('Match the pairs! Attempts: ' + this.attempts + '/' + this.maxAttempts, x + w / 2, titleY + titleSize * 1.3);
 
-    // Card grid
-    const cardW = 55;
-    const cardH = 65;
-    const gap = 10;
-    const gridW = 4;
-    const gridH = 2;
-    const totalW = gridW * (cardW + gap) - gap;
-    const totalH = gridH * (cardH + gap) - gap;
-    const startX = x + (w - totalW) / 2;
-    const startY = y + 80;
+    // Card grid - use shared layout calculation
+    const { cardW, cardH, gap, startX, startY } = this._cardLayout({ x, y, w, h });
+    const symbolSize = Math.max(22, Math.min(36, cardW * 0.5));
+    const backSymbolSize = Math.max(14, Math.min(22, cardW * 0.35));
+    const r = Math.max(4, cardW * 0.08);
 
     for (let i = 0; i < this.cards.length; i++) {
       const cx = startX + (i % 4) * (cardW + gap);
@@ -205,7 +203,6 @@ class MemoryMatch {
       const animT = anim === undefined ? 1 : Math.min(1, anim / 0.28);
       const scaleX = anim === undefined ? 1 : Math.max(0.08, Math.abs(Math.cos(animT * Math.PI)));
       const showFace = anim === undefined || animT >= 0.5;
-      const r = 6;
 
       ctx.save();
       ctx.translate(cx + cardW / 2, cy + cardH / 2);
@@ -236,9 +233,9 @@ class MemoryMatch {
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.fillStyle = cols.text;
-        ctx.font = '28px "Pixelify Sans", sans-serif';
+        ctx.font = Math.round(symbolSize) + 'px "Pixelify Sans", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(this.cards[i], cx + cardW / 2, cy + cardH / 2 + 8);
+        ctx.fillText(this.cards[i], cx + cardW / 2, cy + cardH / 2 + symbolSize * 0.3);
       } else {
         ctx.fillStyle = cols.buttonBg;
         ctx.beginPath();
@@ -258,18 +255,19 @@ class MemoryMatch {
         ctx.stroke();
         // Decorative pattern on back
         ctx.fillStyle = cols.text + '22';
-        ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
+        ctx.font = 'bold ' + Math.round(backSymbolSize) + 'px "Pixelify Sans", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('?', cx + cardW / 2, cy + cardH / 2 + 6);
+        ctx.fillText('?', cx + cardW / 2, cy + cardH / 2 + backSymbolSize * 0.3);
       }
       ctx.restore();
     }
 
-    // Progress
+    // Progress - positioned below the card grid
+    const progressY = startY + 2 * (cardH + gap) + gap;
     ctx.fillStyle = cols.text + '66';
-    ctx.font = '11px "Pixelify Sans", sans-serif';
+    ctx.font = Math.round(labelSize) + 'px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Pairs: ' + this.pairs + '/' + this.totalPairs, x + w / 2, y + 230);
+    ctx.fillText('Pairs: ' + this.pairs + '/' + this.totalPairs, x + w / 2, progressY);
 
     if (this.done) {
       MiniGameUtils.drawResultOverlay(ctx, x, y, w, h, this.winner === 'attacker', cols);

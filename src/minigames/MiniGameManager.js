@@ -41,14 +41,25 @@ class MiniGameManager {
   }
 
   _calcOverlayBounds() {
-    this.overlayW = 700;
-    this.overlayH = 460;
-    this.overlayX = Math.floor((Layout.W - this.overlayW) / 2);
-    this.overlayY = Math.floor((Layout.H - this.overlayH) / 2);
-    this.gameX = this.overlayX + 20;
-    this.gameY = this.overlayY + 95;
-    this.gameW = this.overlayW - 40;
-    this.gameH = this.overlayH - 115;
+    if (Layout.isPortrait) {
+      this.overlayW = Layout.W - 40;
+      this.overlayH = Math.min(Layout.H - 120, 950);
+      this.overlayX = 20;
+      this.overlayY = Math.floor((Layout.H - this.overlayH) / 2);
+      this.gameX = this.overlayX + 16;
+      this.gameY = this.overlayY + 85;
+      this.gameW = this.overlayW - 32;
+      this.gameH = this.overlayH - 100;
+    } else {
+      this.overlayW = 700;
+      this.overlayH = 460;
+      this.overlayX = Math.floor((Layout.W - this.overlayW) / 2);
+      this.overlayY = Math.floor((Layout.H - this.overlayH) / 2);
+      this.gameX = this.overlayX + 20;
+      this.gameY = this.overlayY + 95;
+      this.gameW = this.overlayW - 40;
+      this.gameH = this.overlayH - 115;
+    }
   }
 
   static calculateDifficulty(attacker, defender, boardPos) {
@@ -266,9 +277,11 @@ class MiniGameManager {
 
     ctx.save();
     ctx.globalAlpha = alpha * globalAlpha;
-    ctx.translate(640, 400);
+    const centerX = Layout.W / 2;
+    const centerY = Layout.H / 2;
+    ctx.translate(centerX, centerY);
     ctx.scale(scale, scale);
-    ctx.translate(-640, -400);
+    ctx.translate(-centerX, -centerY);
 
     // Game container with theme colors
     ctx.shadowColor = cols.accent;
@@ -300,6 +313,8 @@ class MiniGameManager {
     // Bottom-right
     ctx.beginPath(); ctx.moveTo(ox + ow - cSize, oy + oh); ctx.lineTo(ox + ow, oy + oh); ctx.lineTo(ox + ow, oy + oh - cSize); ctx.stroke();
 
+    const cx = ox + ow / 2;
+
     // Duel banner
     if (this.isDuel) {
       ctx.fillStyle = cols.accent;
@@ -307,7 +322,7 @@ class MiniGameManager {
       ctx.textAlign = 'center';
       ctx.shadowColor = cols.accent;
       ctx.shadowBlur = 8;
-      ctx.fillText('DUEL', 640, oy + 20);
+      ctx.fillText('DUEL', cx, oy + 20);
       ctx.shadowBlur = 0;
     }
 
@@ -318,7 +333,7 @@ class MiniGameManager {
     ctx.fillStyle = cols.text;
     ctx.font = 'bold 18px "Pixelify Sans", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('SURVIVE', 640, oy + 55);
+    ctx.fillText('SURVIVE', cx, oy + 55);
 
     // Difficulty stars
     const diff = this.challengeDifficulty || 1;
@@ -326,7 +341,7 @@ class MiniGameManager {
     ctx.font = '14px "Pixelify Sans", sans-serif';
     let stars = '';
     for (let i = 0; i < 5; i++) stars += i < diff ? '★' : '☆';
-    ctx.fillText('Difficulty: ' + stars, 640, oy + 75);
+    ctx.fillText('Difficulty: ' + stars, cx, oy + 75);
 
     // Render the mini-game
     this.currentGame.render(ctx, this.gameX, this.gameY, this.gameW, this.gameH);
@@ -350,12 +365,12 @@ class MiniGameManager {
       ctx.shadowBlur = 12;
       ctx.font = 'bold 28px "Pixelify Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(defended ? 'SAVED!' : 'CAPTURED!', 640, oy + oh * 0.55);
+      ctx.fillText(defended ? 'SAVED!' : 'CAPTURED!', cx, oy + oh * 0.55);
       ctx.shadowBlur = 0;
 
       ctx.fillStyle = cols.text + 'bb';
       ctx.font = '13px "Pixelify Sans", sans-serif';
-      ctx.fillText(defended ? 'The threatened piece survives' : 'The capture goes through', 640, oy + oh * 0.62);
+      ctx.fillText(defended ? 'The threatened piece survives' : 'The capture goes through', cx, oy + oh * 0.62);
 
       ctx.globalAlpha = alpha * globalAlpha;
     }
